@@ -79,10 +79,34 @@ include this section.]
 ---
 ```
 
+### typed-v1 Header Extension
+
+When the referenced spec declares `Authority Model: typed-v1`, add this line
+after `**Spec:**`:
+
+```markdown
+**Authority Model:** typed-v1
+```
+
+In `Global Constraints`, copy the exact approved `HC-*` and `BI-*` text. Also
+include the spec's `NG-*`, `DE-*`, and the standard Deviation Policy so
+`task-brief` can select the items relevant to each task. Do not copy every
+design paragraph or `DD-*` item into Global Constraints.
+
+For an untyped or legacy spec, omit the authority-model line and keep the
+existing v6.3 full-spec behavior: the plan argues from the whole spec and every
+spec requirement remains binding.
+
 ## Task Structure
 
 ````markdown
 ### Task N: [Component Name]
+
+<!-- Required for typed-v1 plans; omit for legacy plans. -->
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Forbidden Scope:** NG-1
+**Design Defaults:** DD-1 — [recommended design summary]; replaceable under the deviation policy.
 
 **Files:**
 - Create: `exact/path/to/file.py`
@@ -128,6 +152,18 @@ git commit -m "feat: add specific feature"
 ```
 ````
 
+### typed-v1 Plan Compilation
+
+For typed-v1, map every `HC-*`, `BI-*`, and `DE-*` item to at least one task.
+`DD-*` guides the proposed implementation but remains replaceable. `INFO-*` and `NG-*` never generate a task; cite relevant `NG-*` under `Forbidden Scope`
+instead. An infrastructure or enabling task cites the contract items and done
+evidence it enables—it does not create authority for itself.
+
+Each typed task must contain all four authority fields shown above. Copy the
+relevant IDs, and include a short `DD-*` summary or `None`; do not paste the
+whole spec. The implementation steps describe a good default, but must not
+claim that literal adherence to a `DD-*` is required.
+
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
@@ -142,7 +178,10 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
 
-**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
+**1. Authority coverage:** For typed-v1, map every `HC-*`, `BI-*`, and `DE-*`
+to a task and confirm no task exists only for `DD-*`, `INFO-*`, or `NG-*`.
+For an untyped legacy spec, keep the existing full-spec check: every spec
+section and requirement must map to a task. List any gaps.
 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 

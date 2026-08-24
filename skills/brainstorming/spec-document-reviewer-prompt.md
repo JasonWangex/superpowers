@@ -14,6 +14,23 @@ Subagent (general-purpose):
 
     **Spec to review:** [SPEC_FILE_PATH]
 
+    ## Authority Model
+
+    First check whether the spec declares `Authority Model: typed-v1` before
+    its design sections.
+
+    For a typed-v1 spec, only `HC-*` and `BI-*` are normative. Verify that the
+    Human Contract contains outcome, must-have behavior, non-goals, and done
+    evidence; every Binding Invariant cites an `HC-*`; and no unlabeled prose
+    silently acts as a requirement. `DD-*` is replaceable and any concern about
+    a Design Default is advisory unless it contradicts an `HC-*` or `BI-*`.
+    `INFO-*` is non-normative and never creates a planning requirement. A
+    `FOR REVIEW` Human Contract is valid at this stage; the human approval gate
+    happens after this review.
+
+    If `Authority Model: typed-v1` is absent, use the legacy behavior below:
+    review the whole spec as the implementation-planning authority.
+
     ## What to Check
 
     | Category | What to Look For |

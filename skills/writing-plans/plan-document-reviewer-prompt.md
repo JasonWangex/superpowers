@@ -15,6 +15,22 @@ Subagent (general-purpose):
     **Plan to review:** [PLAN_FILE_PATH]
     **Spec for reference:** [SPEC_FILE_PATH]
 
+    ## Authority Model
+
+    Check whether the plan and spec declare `Authority Model: typed-v1`.
+    For typed-v1, verify exact `HC-*` and `BI-*` text is available in Global
+    Constraints, every `HC-*`, `BI-*`, and `DE-*` has task coverage, and every
+    task contains Contract Coverage, Enables Evidence, Forbidden Scope, and
+    Design Defaults fields. A task may cite `NG-*` as forbidden scope, but
+    `INFO-*` and `NG-*` never generate work.
+
+    `DD-*` is replaceable and is not a missing requirement when a plan chooses
+    a smaller route that preserves `HC-*` and `BI-*`. Flag a Design Default
+    only if the plan mistakenly treats it as normative or the replacement
+    breaks approved authority.
+
+    Without `Authority Model: typed-v1`, use legacy full-spec alignment.
+
     ## What to Check
 
     | Category | What to Look For |

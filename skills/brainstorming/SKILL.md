@@ -97,9 +97,9 @@ your path and complete them in order.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Write typed design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` using `Authority Model: typed-v1`, then commit the draft
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
+8. **User approves authority** — ask the user to review only the Human Contract and Binding Invariants; mark them approved and commit that status
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
@@ -201,6 +201,50 @@ is the whole process.
 
 ## After the Design (architectural path)
 
+### Typed Spec Authority
+
+New architectural specs use this compact opening before design detail:
+
+```markdown
+Authority Model: typed-v1
+
+## Human Contract — FOR REVIEW
+
+### Outcome
+[one sentence]
+
+### Must Have
+- HC-1: [observable product behavior]
+
+### Non-goals
+- NG-1: [behavior or scope that must not be added]
+
+### Done Evidence
+- DE-1: [binary evidence for the outcome]
+
+## Binding Invariants
+- BI-1 (supports HC-1): [compatibility, security, data-integrity, or exact product-semantic constraint]
+
+## Design Defaults
+- DD-1: [recommended internal implementation]
+
+## Informative Notes
+- INFO-1: [example, alternative, explanation, or future idea]
+```
+
+For `typed-v1`, only human-approved `HC-*` and `BI-*` items are normative.
+`DD-*` items are replaceable recommendations: an implementer may choose a
+smaller reversible design that preserves every relevant `HC-*` and `BI-*`.
+`INFO-*` is non-binding, while `NG-*` forbids scope and `DE-*` defines evidence
+instead of implementation. Unlabeled prose is informative; never let an
+AI-authored design sentence acquire authority merely by appearing in the spec.
+
+The Human Contract stays short enough for real human review. Promoting or
+changing an `HC-*` or `BI-*` item requires explicit user approval. Design
+discussion can still be detailed, but put internal APIs, class splits,
+algorithms, storage choices, file layout, and library choices under `DD-*`
+unless the human explicitly approves one as a binding invariant.
+
 **Documentation:**
 
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
@@ -219,11 +263,18 @@ After writing the spec document, look at it with fresh eyes:
 Fix any issues inline. No need to re-review — just fix and move on.
 
 **User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+After the spec review loop passes, ask the user to review the Human Contract
+and Binding Invariants, not the whole AI-authored document:
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Typed spec written to `<path>`. Please review the Human Contract (`HC-*`,
+> `NG-*`, `DE-*`) and Binding Invariants (`BI-*`). The remaining `DD-*` and
+> `INFO-*` sections are replaceable design guidance, not delivery authority."
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+Wait for the user's response. If they request changes, make them and re-run the
+spec review loop. Only after explicit approval, change the heading to
+`## Human Contract — APPROVED`, record who approved it and when, commit the
+approval state, then proceed. The user does not need to review every Design
+Default for that approval to be valid.
 
 **Implementation:**
 

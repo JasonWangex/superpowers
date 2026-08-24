@@ -77,6 +77,7 @@ tests=(
     "test-worktree-path-policy.sh"
     "test-sdd-workspace.sh"
     "test-subagent-driven-development.sh"
+    "test-typed-spec-authority-content.sh"
 )
 
 # Integration tests (slow, full execution)
