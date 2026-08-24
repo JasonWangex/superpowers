@@ -138,6 +138,48 @@ PLAN
 **Design Defaults:** None.
 PLAN
 
+    write_typed_plan_fixture() {
+        local path="$1"
+        local contract="$2"
+        local evidence="$3"
+        local forbidden="$4"
+        local defaults="$5"
+        cat > "$path" <<PLAN
+# Typed Field Validation Fixture
+
+**Spec:** \`docs/superpowers/specs/example.md\`
+**Authority Model:** typed-v1
+
+## Global Constraints
+- HC-1: Preserve the public response.
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+- NG-1: Do not refactor unrelated behavior.
+- DE-1: Contract tests pass.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed.
+
+---
+
+### Task 1: Validate field namespaces
+
+**Contract Coverage:** ${contract}
+**Enables Evidence:** ${evidence}
+**Forbidden Scope:** ${forbidden}
+**Design Defaults:** ${defaults}
+PLAN
+    }
+
+    write_typed_plan_fixture "$repo/typed-invalid-contract.md" "NG-1" "DE-1" "NG-1" "DD-1 — optional structure."
+    write_typed_plan_fixture "$repo/typed-invalid-evidence.md" "HC-1, BI-1" "HC-1" "NG-1" "DD-1 — optional structure."
+    write_typed_plan_fixture "$repo/typed-invalid-forbidden.md" "HC-1, BI-1" "DE-1" "BI-1" "DD-1 — optional structure."
+    write_typed_plan_fixture "$repo/typed-invalid-defaults.md" "HC-1, BI-1" "DE-1" "NG-1" "DE-1"
+    write_typed_plan_fixture "$repo/typed-empty-contract.md" "" "DE-1" "NG-1" "DD-1 — optional structure."
+    write_typed_plan_fixture "$repo/typed-empty-evidence.md" "HC-1, BI-1" "" "NG-1" "DD-1 — optional structure."
+    write_typed_plan_fixture "$repo/typed-empty-forbidden.md" "HC-1, BI-1" "DE-1" "" "DD-1 — optional structure."
+    write_typed_plan_fixture "$repo/typed-empty-defaults.md" "HC-1, BI-1" "DE-1" "NG-1" ""
+    write_typed_plan_fixture "$repo/typed-none-optionals.md" "HC-1, BI-1" "None." "None." "None."
+
     # --- argument validation ---
     local rc=0
     (cd "$repo" && "$SDD_SCRIPTS/sdd-workspace" >/dev/null 2>&1) || rc=$?
@@ -276,6 +318,58 @@ PLAN
     else
         fail "typed plan with an empty inline spec path errors with exit 4"
         echo "    exit: $rc"
+    fi
+
+    local invalid_typed_plan
+    for invalid_typed_plan in \
+        typed-invalid-contract.md \
+        typed-invalid-evidence.md \
+        typed-invalid-forbidden.md \
+        typed-invalid-defaults.md \
+        typed-empty-contract.md \
+        typed-empty-evidence.md \
+        typed-empty-forbidden.md \
+        typed-empty-defaults.md; do
+        rc=0
+        (cd "$repo" && "$SDD_SCRIPTS/task-brief" "$invalid_typed_plan" 1 >/dev/null 2>&1) || rc=$?
+        if [[ "$rc" -eq 4 ]]; then
+            pass "typed task rejects invalid authority field: $invalid_typed_plan"
+        else
+            fail "typed task rejects invalid authority field: $invalid_typed_plan"
+            echo "    exit: $rc"
+        fi
+    done
+
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-none-optionals.md 1 >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 0 ]]; then
+        pass "typed task accepts explicit None for optional authority fields"
+    else
+        fail "typed task accepts explicit None for optional authority fields"
+        echo "    exit: $rc"
+    fi
+
+    # A failed regeneration must invalidate a prior successful brief so no
+    # caller can accidentally execute stale authority.
+    local reused_brief="$TEST_ROOT/reused-brief.md"
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan.md 1 "$reused_brief" >/dev/null)
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-invalid-contract.md 1 "$reused_brief" >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 4 && -e "$reused_brief" && ! -s "$reused_brief" ]]; then
+        pass "failed typed regeneration invalidates a stale brief"
+    else
+        fail "failed typed regeneration invalidates a stale brief"
+        echo "    exit: $rc; bytes: $(wc -c < "$reused_brief" 2>/dev/null || printf '?')"
+    fi
+
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan.md 1 "$reused_brief" >/dev/null)
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" plan-a.md 99 "$reused_brief" >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 3 && -e "$reused_brief" && ! -s "$reused_brief" ]]; then
+        pass "missing legacy task invalidates a stale brief"
+    else
+        fail "missing legacy task invalidates a stale brief"
+        echo "    exit: $rc; bytes: $(wc -c < "$reused_brief" 2>/dev/null || printf '?')"
     fi
 
     # --- review-package takes the plan first and lands in its directory ---

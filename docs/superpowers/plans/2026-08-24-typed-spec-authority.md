@@ -291,3 +291,50 @@ Claude Code test helpers; no new dependency.
   git add tests/claude-code/typed-spec-authority-pressure.md tests/claude-code/README.md docs/superpowers/specs/2026-08-24-typed-spec-authority-eval-results.md
   git commit -m "test: document typed authority behavior evidence"
   ```
+
+### Task 5: Close Final Review Execution Gaps
+
+**Contract Coverage:** HC-1, HC-2, HC-3, HC-4, BI-1, BI-2, BI-3, BI-4
+**Enables Evidence:** DE-3, DE-4
+**Forbidden Scope:** NG-1, NG-2, NG-3, NG-4, NG-5
+**Design Defaults:** DD-5 — extend the existing inline executor and Bash helper rather than introducing another execution path or parser; replaceable under the deviation policy.
+
+**Files:**
+- Modify: `skills/executing-plans/SKILL.md`
+- Modify: `skills/subagent-driven-development/scripts/task-brief`
+- Modify: `tests/claude-code/test-typed-spec-authority-content.sh`
+- Modify: `tests/claude-code/test-sdd-workspace.sh`
+
+**Interfaces:**
+- Consumes: typed or legacy plans through either supported execution skill.
+- Produces: identical typed authority semantics at the inline endpoint, strict authority-field namespaces, and an empty output after any failed brief regeneration.
+
+- [ ] **Step 1: Reproduce the final-review findings with tests**
+
+  Require `executing-plans` to branch on typed-v1 and compile an Authority
+  Prelude. Add helper fixtures that swap authority namespaces, leave fields
+  empty, and regenerate a failed task over a previously successful output.
+
+- [ ] **Step 2: Run the focused tests and verify RED**
+
+  Run both deterministic typed-authority test scripts. Expected: six content
+  failures and nine helper failures on the reviewed implementation.
+
+- [ ] **Step 3: Implement the narrow fixes**
+
+  Make inline execution consume `task-brief`; validate `Contract Coverage` as
+  only `HC-*`/`BI-*`, evidence as `DE-*` or `None`, forbidden scope as `NG-*`
+  or `None`, and defaults as `DD-*` or `None`; invalidate an old output before
+  parsing while retaining atomic success writes.
+
+- [ ] **Step 4: Run focused and repository regression tests**
+
+  Expected: all deterministic tests pass; any external authentication blocker
+  is reported separately and is not described as a product failure.
+
+- [ ] **Step 5: Commit and request re-review**
+
+  ```bash
+  git add docs/superpowers/plans/2026-08-24-typed-spec-authority.md skills/executing-plans/SKILL.md skills/subagent-driven-development/scripts/task-brief tests/claude-code/test-typed-spec-authority-content.sh tests/claude-code/test-sdd-workspace.sh
+  git commit -m "fix: close typed authority execution gaps"
+  ```

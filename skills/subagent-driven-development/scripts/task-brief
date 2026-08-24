@@ -25,6 +25,10 @@ else
   out="$dir/task-${n}-brief.md"
 fi
 
+# Invalidate any previous brief before parsing. If regeneration fails, callers
+# must see an empty artifact rather than accidentally executing stale authority.
+: > "$out"
+
 task_tmp=$(mktemp)
 render_tmp=""
 cleanup() {
@@ -97,14 +101,41 @@ ids_from() {
   printf '%s\n' "$1" | grep -Eo '(HC|BI|NG|DE|DD)-[0-9]+' | sort -u | tr '\n' ' '
 }
 
+is_explicit_none() {
+  local normalized
+  normalized=$(printf '%s\n' "$1" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+  [ "$normalized" = "None" ] || [ "$normalized" = "None." ]
+}
+
+validate_authority_field() {
+  local label=$1
+  local value=$2
+  local allowed_prefixes=$3
+  local allow_none=$4
+  local all_ids allowed_ids none_note=""
+
+  if [ "$allow_none" = "yes" ] && is_explicit_none "$value"; then
+    return 0
+  fi
+
+  all_ids=$(ids_from "$value" || true)
+  allowed_ids=$(printf '%s\n' "$value" | grep -Eo "(${allowed_prefixes})-[0-9]+" | sort -u | tr '\n' ' ' || true)
+
+  if [ -z "$value" ] || [ -z "$allowed_ids" ] || [ "$all_ids" != "$allowed_ids" ]; then
+    if [ "$allow_none" = "yes" ]; then none_note=" or explicit None"; fi
+    echo "typed-v1 task ${n} in ${plan} has invalid '${label}'; expected ${allowed_prefixes//|/ or }-* IDs${none_note}" >&2
+    exit 4
+  fi
+}
+
+validate_authority_field "Contract Coverage" "$contract_value" "HC|BI" "no"
+validate_authority_field "Enables Evidence" "$evidence_value" "DE" "yes"
+validate_authority_field "Forbidden Scope" "$forbidden_value" "NG" "yes"
+validate_authority_field "Design Defaults" "$defaults_value" "DD" "yes"
+
 contract_ids=$(ids_from "$contract_value" || true)
 evidence_ids=$(ids_from "$evidence_value" || true)
 forbidden_ids=$(ids_from "$forbidden_value" || true)
-
-if [ -z "$contract_ids" ]; then
-  echo "typed-v1 task ${n} in ${plan} must cite at least one HC-* or BI-* item" >&2
-  exit 4
-fi
 
 extract_referenced_lines() {
   refs=$1

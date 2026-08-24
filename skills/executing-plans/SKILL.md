@@ -18,17 +18,33 @@ Load plan, review critically, execute all tasks, report when complete.
 ### Step 1: Load and Review Plan
 1. Ensure an isolated workspace: use superpowers:using-git-worktrees to create one or verify the existing one
 2. Read plan file
-3. Review critically - identify any questions or concerns about the plan
-4. If concerns: Raise them with your human partner before starting
-5. If no concerns: Create todos for the plan items and proceed
+3. Detect the authority model:
+   - If the header contains `**Authority Model:** typed-v1`, use the typed-v1 path below
+   - Otherwise use the legacy/untyped path
+4. Review critically - identify any questions or concerns about the plan
+5. If concerns: Raise them with your human partner before starting
+6. If no concerns: Create todos for the plan items and proceed
+
+### Authority Models
+
+**typed-v1:** Before each task, run the sibling `../subagent-driven-development/scripts/task-brief PLAN_FILE TASK_NUMBER` script (resolved from this skill's directory), then read the generated brief. The task brief's Authority Prelude is the source of requirements and execution authority for that task.
+
+- `HC-*` and `BI-*` are normative requirements.
+- `DE-*` is required evidence; `NG-*` is forbidden scope.
+- `DD-*` is a replaceable design default. Implementing a smaller reversible alternative to a `DD-*` item is allowed when all relevant `HC-*` and `BI-*` items still pass; record the reason and evidence in the task report.
+- A blocking issue must cite violated `HC-*`, `BI-*`, `DE-*`, or `NG-*` authority, or identify a diff-caused correctness, security, compatibility, or data-loss defect. Divergence from `DD-*` alone is advisory.
+- Stop and ask before changing `HC-*` or `BI-*`, or before expanding public API, security-sensitive, irreversible, or destructive behavior beyond the brief.
+
+**Legacy/untyped:** The existing v6.3 behavior is unchanged: the plan and referenced spec remain binding, and follow each step exactly.
 
 ### Step 2: Execute Tasks
 
 For each task:
 1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+2. For typed-v1, generate and read that task's brief, follow its normative authority plus the plan's process and verification steps, and treat implementation-shape instructions covered by `DD-*` as replaceable defaults
+3. For legacy/untyped plans, follow each step exactly (plan has bite-sized steps)
+4. Run verifications as specified
+5. Mark as completed
 
 ### Step 3: Complete Development
 

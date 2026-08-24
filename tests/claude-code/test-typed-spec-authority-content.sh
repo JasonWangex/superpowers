@@ -55,6 +55,7 @@ main() {
     local spec_reviewer="skills/brainstorming/spec-document-reviewer-prompt.md"
     local writing_plans="skills/writing-plans/SKILL.md"
     local plan_reviewer="skills/writing-plans/plan-document-reviewer-prompt.md"
+    local executing_plans="skills/executing-plans/SKILL.md"
     local sdd="skills/subagent-driven-development/SKILL.md"
     local implementer="skills/subagent-driven-development/implementer-prompt.md"
     local task_reviewer="skills/subagent-driven-development/task-reviewer-prompt.md"
@@ -105,6 +106,19 @@ main() {
         "plan reviewer checks typed normative coverage"
     require_regex "$plan_reviewer" 'DD-\*.*(not.*missing|not.*require|replaceable|advisory)' \
         "plan reviewer does not require Design Defaults literally"
+
+    require_literal "$executing_plans" "**Authority Model:** typed-v1" \
+        "executing-plans detects the typed authority model"
+    require_literal "$executing_plans" "task-brief" \
+        "executing-plans compiles a typed authority brief"
+    require_regex_flat "$executing_plans" '(task brief|authority prelude).*(execution authority|source of requirements)|(execution authority|source of requirements).*(task brief|authority prelude)' \
+        "executing-plans makes the typed brief the execution authority"
+    require_regex_flat "$executing_plans" 'DD-\*.*smaller.*reversible.*(allowed|implement)|smaller.*reversible.*DD-\*' \
+        "executing-plans permits smaller reversible Design Default deviations"
+    require_regex_flat "$executing_plans" 'HC-\*.*BI-\*.*DE-\*.*NG-\*.*diff-caused|diff-caused.*HC-\*.*BI-\*.*DE-\*.*NG-\*' \
+        "executing-plans defines typed blocker eligibility"
+    require_regex "$executing_plans" '(untyped|legacy).*follow each step exactly|follow each step exactly.*(untyped|legacy)' \
+        "executing-plans preserves legacy exact-step behavior"
 
     require_literal "$sdd" "**Authority Model:** typed-v1" \
         "SDD detects the typed authority model"
