@@ -245,7 +245,7 @@ Claude Code test helpers; no new dependency.
 
 **Files:**
 - Create: `tests/claude-code/typed-spec-authority-pressure.md`
-- Create: `docs/superpowers/evals/2026-08-24-typed-spec-authority.md`
+- Create: `docs/superpowers/specs/2026-08-24-typed-spec-authority-eval-results.md`
 - Modify: `tests/claude-code/README.md`
 
 **Interfaces:**
@@ -288,6 +288,6 @@ Claude Code test helpers; no new dependency.
 - [ ] **Step 5: Commit**
 
   ```bash
-  git add tests/claude-code/typed-spec-authority-pressure.md tests/claude-code/README.md docs/superpowers/evals/2026-08-24-typed-spec-authority.md
+  git add tests/claude-code/typed-spec-authority-pressure.md tests/claude-code/README.md docs/superpowers/specs/2026-08-24-typed-spec-authority-eval-results.md
   git commit -m "test: document typed authority behavior evidence"
   ```

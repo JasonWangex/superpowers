@@ -92,6 +92,19 @@ Tests skill content and requirements (~2 minutes):
 - Review loops documented
 - Task context provision documented
 
+#### test-typed-spec-authority-content.sh
+Deterministic typed-v1 contract test:
+- Typed spec and plan authoring boundaries
+- Task authority fields and legacy fallback
+- Implementer, task-review, re-review, and final-review propagation
+- Blocker eligibility and non-blocking Design Default deviations
+
+#### typed-spec-authority-pressure.md
+Manual behavior fixture, not part of the fast suite. Run CONTROL and TREATMENT
+in at least five fresh contexts when changing typed authority semantics. See
+`docs/superpowers/specs/2026-08-24-typed-spec-authority-eval-results.md` for the frozen
+`gpt-5.6-sol` xhigh evidence and revision IDs.
+
 ### Integration Tests (use --integration flag)
 
 #### test-subagent-driven-development-integration.sh
