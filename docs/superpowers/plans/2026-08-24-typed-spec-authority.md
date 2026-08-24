@@ -17,8 +17,7 @@ only on that authority, evidence, forbidden scope, and diff-caused regressions.
 **Tech Stack:** Markdown skills and prompt templates, Bash, POSIX `awk`, existing
 Claude Code test helpers; no new dependency.
 
-**Spec:**
-`docs/superpowers/specs/2026-08-24-typed-spec-authority-design.md`
+**Spec:** `docs/superpowers/specs/2026-08-24-typed-spec-authority-design.md`
 
 **Authority Model:** typed-v1
 

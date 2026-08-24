@@ -50,6 +50,93 @@ PLAN
 
 Do the other thing.
 PLAN
+    cat > "$repo/typed-plan.md" <<'PLAN'
+# Typed Plan
+
+**Spec:** `docs/superpowers/specs/example.md`
+**Authority Model:** typed-v1
+
+## Global Constraints
+
+### Human Contract
+- HC-1: Preserve the public response.
+- HC-2: Unrelated contract item.
+
+### Binding Invariants
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+- BI-2 (supports HC-2): Unrelated invariant.
+
+### Non-goals
+- NG-1: Do not refactor unrelated behavior.
+- NG-2: Unrelated non-goal.
+
+### Done Evidence
+- DE-1: Contract tests pass.
+- DE-2: Unrelated evidence.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed when all relevant HC-* and BI-* items still pass; record the reason and evidence.
+
+---
+
+### Task 1: Add the response field
+
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Forbidden Scope:** NG-1
+**Design Defaults:** DD-1 — split the service into three classes; replaceable under the deviation policy.
+
+Add the response field with the smallest conforming change.
+PLAN
+    cat > "$repo/typed-plan-missing-field.md" <<'PLAN'
+# Invalid Typed Plan
+
+**Spec:** `docs/superpowers/specs/example.md`
+**Authority Model:** typed-v1
+
+## Global Constraints
+
+- HC-1: Preserve the public response.
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+- DE-1: Contract tests pass.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed.
+
+---
+
+### Task 1: Invalid typed task
+
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Design Defaults:** None.
+
+This task omits Forbidden Scope.
+PLAN
+    cat > "$repo/typed-plan-empty-spec.md" <<'PLAN'
+# Invalid Typed Plan
+
+**Spec:**
+`docs/superpowers/specs/example.md`
+**Authority Model:** typed-v1
+
+## Global Constraints
+- HC-1: Preserve the public response.
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+- DE-1: Contract tests pass.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed.
+
+---
+
+### Task 1: Invalid typed task
+
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Forbidden Scope:** None.
+**Design Defaults:** None.
+PLAN
 
     # --- argument validation ---
     local rc=0
@@ -127,6 +214,68 @@ PLAN
     else
         fail "task-brief writes its brief under the plan's workspace"
         echo "    got: $brief_path"
+    fi
+
+    local legacy_expected legacy_actual
+    legacy_expected=$'## Task 1: First thing\n\nDo the first thing.'
+    legacy_actual="$(cat "$brief_path")"
+    if [[ "$legacy_actual" == "$legacy_expected" ]]; then
+        pass "untyped task-brief output remains byte-for-byte task-only"
+    else
+        fail "untyped task-brief output remains byte-for-byte task-only"
+        echo "    got: $legacy_actual"
+    fi
+
+    # --- typed task-brief carries only the task's authority ---
+    local typed_out typed_path typed_content
+    typed_out="$(cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan.md 1)"
+    typed_path="$(printf '%s\n' "$typed_out" | sed -n 's/^wrote \(.*\): [0-9][0-9]* lines$/\1/p')"
+    typed_content="$(cat "$typed_path")"
+
+    local required_text
+    for required_text in \
+        "# Authority Prelude" \
+        "**Authority Model:** typed-v1" \
+        '**Spec:** `docs/superpowers/specs/example.md`' \
+        "HC-1: Preserve the public response." \
+        "BI-1 (supports HC-1): Existing response fields remain compatible." \
+        "NG-1: Do not refactor unrelated behavior." \
+        "DE-1: Contract tests pass." \
+        "DD-1 — split the service into three classes; replaceable under the deviation policy." \
+        "Replacing a DD-* item with a smaller reversible implementation is allowed" \
+        "### Task 1: Add the response field"; do
+        if [[ "$typed_content" == *"$required_text"* ]]; then
+            pass "typed task-brief contains: $required_text"
+        else
+            fail "typed task-brief contains: $required_text"
+        fi
+    done
+
+    local unrelated_text
+    for unrelated_text in "HC-2:" "BI-2" "NG-2:" "DE-2:"; do
+        if [[ "$typed_content" != *"$unrelated_text"* ]]; then
+            pass "typed task-brief excludes unrelated authority: $unrelated_text"
+        else
+            fail "typed task-brief excludes unrelated authority: $unrelated_text"
+        fi
+    done
+
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan-missing-field.md 1 >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 4 ]]; then
+        pass "typed task missing an authority field errors with exit 4"
+    else
+        fail "typed task missing an authority field errors with exit 4"
+        echo "    exit: $rc"
+    fi
+
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan-empty-spec.md 1 >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 4 ]]; then
+        pass "typed plan with an empty inline spec path errors with exit 4"
+    else
+        fail "typed plan with an empty inline spec path errors with exit 4"
+        echo "    exit: $rc"
     fi
 
     # --- review-package takes the plan first and lands in its directory ---

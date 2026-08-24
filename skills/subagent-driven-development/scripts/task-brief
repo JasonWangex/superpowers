@@ -25,17 +25,155 @@ else
   out="$dir/task-${n}-brief.md"
 fi
 
+task_tmp=$(mktemp)
+render_tmp=""
+cleanup() {
+  rm -f "$task_tmp"
+  if [ -n "$render_tmp" ]; then
+    rm -f "$render_tmp"
+  fi
+}
+trap cleanup EXIT
+
 awk -v n="$n" '
   /^```/ { infence = !infence }
   !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ {
     intask = ($0 ~ ("^#+[ \t]+Task[ \t]+" n "([^0-9]|$)"))
   }
   intask { print }
-' "$plan" > "$out"
+' "$plan" > "$task_tmp"
 
-if [ ! -s "$out" ]; then
+if [ ! -s "$task_tmp" ]; then
   echo "task ${n} not found in ${plan} (no heading matching 'Task ${n}')" >&2
   exit 3
 fi
+
+if ! awk '
+  /^```/ { infence = !infence }
+  !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ { exit }
+  !infence && /^\*\*Authority Model:\*\*[ \t]*typed-v1[ \t]*$/ { found = 1 }
+  END { exit !found }
+' "$plan"; then
+  mv "$task_tmp" "$out"
+  task_tmp=""
+  echo "wrote ${out}: $(wc -l < "$out" | tr -d ' ') lines"
+  exit 0
+fi
+
+for field in "Contract Coverage" "Enables Evidence" "Forbidden Scope" "Design Defaults"; do
+  if ! grep -q "^\\*\\*${field}:\\*\\*[[:space:]]*" "$task_tmp"; then
+    echo "typed-v1 task ${n} in ${plan} is missing '${field}'" >&2
+    exit 4
+  fi
+done
+
+spec_line=$(awk '
+  /^```/ { infence = !infence }
+  !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ { exit }
+  !infence && /^\*\*Spec:\*\*[ \t]*[^ \t]/ { print; exit }
+' "$plan")
+if [ -z "$spec_line" ]; then
+  echo "typed-v1 plan ${plan} is missing an inline '**Spec:** <path>' before its tasks" >&2
+  exit 4
+fi
+
+authority_model=$(awk '
+  /^```/ { infence = !infence }
+  !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ { exit }
+  !infence && /^\*\*Authority Model:\*\*/ { print; exit }
+' "$plan")
+
+field_value() {
+  field_name=$1
+  sed -n "s/^\\*\\*${field_name}:\\*\\*[[:space:]]*//p" "$task_tmp" | head -1
+}
+
+contract_value=$(field_value "Contract Coverage")
+evidence_value=$(field_value "Enables Evidence")
+forbidden_value=$(field_value "Forbidden Scope")
+defaults_value=$(field_value "Design Defaults")
+
+ids_from() {
+  printf '%s\n' "$1" | grep -Eo '(HC|BI|NG|DE|DD)-[0-9]+' | sort -u | tr '\n' ' '
+}
+
+contract_ids=$(ids_from "$contract_value" || true)
+evidence_ids=$(ids_from "$evidence_value" || true)
+forbidden_ids=$(ids_from "$forbidden_value" || true)
+
+if [ -z "$contract_ids" ]; then
+  echo "typed-v1 task ${n} in ${plan} must cite at least one HC-* or BI-* item" >&2
+  exit 4
+fi
+
+extract_referenced_lines() {
+  refs=$1
+  awk -v refs=" $refs" '
+    /^```/ { infence = !infence }
+    !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ { exit }
+    !infence && match($0, /(HC|BI|NG|DE)-[0-9]+/) {
+      id = substr($0, RSTART, RLENGTH)
+      if (index(refs, " " id " ")) print
+    }
+  ' "$plan"
+}
+
+contract_lines=$(extract_referenced_lines "$contract_ids")
+evidence_lines=$(extract_referenced_lines "$evidence_ids")
+forbidden_lines=$(extract_referenced_lines "$forbidden_ids")
+
+referenced_count() {
+  printf '%s\n' "$1" | awk '{ for (i = 1; i <= NF; i++) count++ } END { print count + 0 }'
+}
+
+line_count() {
+  if [ -z "$1" ]; then
+    printf '0\n'
+  else
+    printf '%s\n' "$1" | wc -l | tr -d ' '
+  fi
+}
+
+if [ "$(line_count "$contract_lines")" -ne "$(referenced_count "$contract_ids")" ]; then
+  echo "typed-v1 task ${n} in ${plan} cites missing HC-* or BI-* authority" >&2
+  exit 4
+fi
+if [ "$(line_count "$evidence_lines")" -ne "$(referenced_count "$evidence_ids")" ]; then
+  echo "typed-v1 task ${n} in ${plan} cites missing DE-* evidence" >&2
+  exit 4
+fi
+if [ "$(line_count "$forbidden_lines")" -ne "$(referenced_count "$forbidden_ids")" ]; then
+  echo "typed-v1 task ${n} in ${plan} cites missing NG-* scope" >&2
+  exit 4
+fi
+
+deviation_policy=$(awk '
+  /^```/ { infence = !infence }
+  !infence && /^##+[ \t]+Deviation Policy[ \t]*$/ { inpolicy = 1; next }
+  inpolicy && !infence && (/^---[ \t]*$/ || /^#+[ \t]+Task[ \t]+[0-9]+/) { exit }
+  inpolicy && NF { print }
+' "$plan")
+if [ -z "$deviation_policy" ]; then
+  echo "typed-v1 plan ${plan} is missing a Deviation Policy before its tasks" >&2
+  exit 4
+fi
+
+render_tmp=$(mktemp)
+{
+  printf '# Authority Prelude\n\n'
+  printf '%s\n' "$authority_model"
+  printf '%s\n\n' "$spec_line"
+  printf '## Normative Authority\n\n%s\n\n' "$contract_lines"
+  printf '## Relevant Non-goals\n\n'
+  if [ -n "$forbidden_lines" ]; then printf '%s\n' "$forbidden_lines"; else printf -- '- None.\n'; fi
+  printf '\n## Required Evidence\n\n'
+  if [ -n "$evidence_lines" ]; then printf '%s\n' "$evidence_lines"; else printf -- '- None.\n'; fi
+  printf '\n## Design Defaults\n\n- %s\n\n' "$defaults_value"
+  printf '## Deviation Policy\n\n%s\n\n---\n\n' "$deviation_policy"
+  cat "$task_tmp"
+} > "$render_tmp"
+
+mv "$render_tmp" "$out"
+render_tmp=""
 
 echo "wrote ${out}: $(wc -l < "$out" | tr -d ' ') lines"
