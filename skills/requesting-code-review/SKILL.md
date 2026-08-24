@@ -33,15 +33,27 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md](code-reviewer.md)
 
+Detect the authority model from the plan. A plan declaring
+`**Authority Model:** typed-v1` uses typed-v1; an untyped plan or ad-hoc review
+uses legacy, preserving the existing v6.3 full review behavior.
+
 **Placeholders:**
 - `{DESCRIPTION}` - Brief summary of what you built
 - `{PLAN_OR_REQUIREMENTS}` - What it should do
+- `{AUTHORITY_MODEL}` - `typed-v1` or `legacy`
+- `{AUTHORITY_PRELUDE}` - For typed-v1, the plan path containing its pre-task
+  Global Constraints and Deviation Policy; for legacy, `N/A`
 - `{BASE_SHA}` - Starting commit
 - `{HEAD_SHA}` - Ending commit
 
 **3. Act on feedback:**
-- Fix Critical issues immediately
-- Fix Important issues before proceeding
+- For typed-v1, apply blocker eligibility before a fix: the finding must cite
+  `HC-*`, `BI-*`, missing `DE-*`, violated `NG-*`, or a concrete diff-caused
+  correctness, security, compatibility, or data-loss regression
+- Fix eligible Critical issues immediately
+- Fix eligible Important issues before proceeding
+- Keep typed-v1 advisory Recommendations out of the fix wave
+- For legacy, preserve existing behavior: fix all Critical and Important issues
 - Note Minor issues for later
 - Push back if reviewer is wrong (with reasoning)
 
@@ -58,6 +70,8 @@ HEAD_SHA=$(git rev-parse HEAD)
 [Dispatch code reviewer subagent]
   DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
   PLAN_OR_REQUIREMENTS: Task 2 from docs/superpowers/plans/deployment-plan.md
+  AUTHORITY_MODEL: legacy
+  AUTHORITY_PRELUDE: N/A
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
 
@@ -83,8 +97,8 @@ You: [Fix progress indicators]
 
 **Never:**
 - Skip review because "it's simple"
-- Ignore Critical issues
-- Proceed with unfixed Important issues
+- Ignore eligible Critical issues
+- Proceed with unfixed eligible Important issues
 - Argue with valid technical feedback
 
 **If reviewer wrong:**

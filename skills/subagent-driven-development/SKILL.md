@@ -18,17 +18,37 @@ ledger and the tool results carry the record.
 
 **Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
 ambiguities, plan defects, a cap you would have asked to exceed — decide
-them. The spec is the binding authority, the plan is its argument, and your
-judgment settles what neither answers. Record every decision in the ledger as
-`Ruling: <what you decided> — <why> — <what it costs if wrong>`, and keep
-going. A wrong ruling costs rework your human partner can see and undo; a
-session parked on a question costs their whole day and buys nothing.
+them according to the authority model below. Record every decision in the
+ledger as `Ruling: <what you decided> — <why> — <what it costs if wrong>`,
+and keep going. A wrong ruling costs rework your human partner can see and
+undo; a session parked on a question costs their whole day and buys nothing.
 
 Four things stop you, and only these: an irreversible or destructive
 operation; a security-sensitive action; a side effect outside this worktree
 that norms say you ask about first (a merge, a push to a shared branch, a
 publish); and a plan so broken that every path forward is a guess. For those,
 stop and ask.
+
+## Authority Models
+
+Detect `**Authority Model:** typed-v1` in the plan header.
+
+- **typed-v1:** the generated task brief's Authority Prelude is the task's
+  binding authority and source of requirements. Only its `HC-*` and `BI-*`
+  items are normative. `DE-*` defines required evidence, `NG-*` forbids scope,
+  and `DD-*` is replaceable guidance. A smaller reversible replacement for a
+  `DD-*` is allowed when every relevant `HC-*` and `BI-*` remains satisfied;
+  ledger the deviation, reason, and evidence. Changing `HC-*`, `BI-*`, public
+  compatibility, security, or irreversible data behavior still stops for
+  human approval.
+- **Legacy/untyped:** preserve v6.3 behavior. The spec is the binding authority
+  and the plan is its argument; everything the task requires remains required.
+
+For typed-v1, blockers are eligible only when they cite an `HC-*`, `BI-*`,
+missing `DE-*`, violated `NG-*`, or a concrete diff-caused correctness,
+security, compatibility, or data-loss regression. Literal divergence from a
+`DD-*` and uncited architecture, scalability, documentation, or hardening
+suggestions are advisory and never enter a fix loop.
 
 ## When to Use
 
@@ -153,16 +173,18 @@ a ledger file, not only in todos.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch); if
   that happens, recover from `git log`.
 
-Read the plan once, note its context and Global Constraints, and create a
-todo per task. If the plan names a Spec, read that too: the spec is the
-authority the plan argues from, and conflicts inside the plan resolve
-against it. A plan with no reachable spec gets a ledger note saying so —
-rulings made without one are provisional.
+Read the plan once, detect its Authority Model, note its context and Global
+Constraints, and create a todo per task. If the plan names a Spec, read that
+too. For typed-v1, verify its Human Contract is marked APPROVED and resolve
+conflicts against `HC-*` and `BI-*`; the remaining spec is design context. For
+legacy plans, the whole spec remains the binding authority. A plan with no
+reachable spec gets a ledger note saying so — rulings made without one are
+provisional.
 
 Before dispatching Task 1, scan the plan once for conflicts, writing down
 what you checked as you check it:
 
-- tasks that contradict each other or the plan's Global Constraints
+- tasks that contradict each other or the plan's binding Global Constraints
 - anything the plan explicitly mandates that the review rubric treats as a
   defect (a test that asserts nothing, verbatim duplication of a logic block)
 
@@ -176,10 +198,11 @@ is clean" without those rows is not a scan you ran.
 Write the table to the ledger. Rule on everything you find before execution
 begins — each finding against the plan text that mandates it — and record
 each ruling in the ledger. If the scan is clean, proceed without comment.
-Rule on each conflict it surfaces — the spec is the binding authority, the
-plan is its argument — record the ruling beside its row, and dispatch
-Task 1. The review loop remains the net for conflicts that only emerge from
-implementation.
+Rule on each conflict it surfaces. For typed-v1, rule against `HC-*` and
+`BI-*`; a `DD-*` may be replaced rather than enforced. For legacy plans, rule
+against the spec as binding authority. Record the ruling beside its row and
+dispatch Task 1. The review loop remains the net for conflicts that only
+emerge from implementation.
 
 ## Model Selection
 
@@ -253,11 +276,15 @@ and fix-round diffs need it.
   uniquely named file and prints the path. Compose the dispatch so the
   brief stays the single source of
   requirements. Your dispatch should contain: (1) one line on where this
-  task fits in the project; (2) the brief path, introduced as "read this
-  first — it is your requirements, with the exact values to use verbatim";
-  (3) interfaces and decisions from earlier tasks that the brief cannot
-  know; (4) your resolution of any ambiguity you noticed in the brief;
-  (5) the report-file path and report contract. Exact values (numbers,
+  task fits in the project; (2) the brief path, introduced for typed-v1 as
+  "read this first — its Authority Prelude is your requirements; normative
+  exact values are verbatim and Design Defaults are replaceable," or for
+  legacy as "read this first — it is your requirements, with the exact values
+  to use verbatim";
+  (3) the explicit authority model (`typed-v1` or `legacy`); (4) interfaces
+  and decisions from earlier tasks that the brief cannot know; (5) your
+  resolution of any ambiguity you noticed in the brief; (6) the report-file
+  path and report contract. Exact values (numbers,
   magic strings, signatures, test cases) appear only in the brief. Never
   make a subagent read the whole plan file.
 - **Report file:** name the implementer's report file after the brief
@@ -309,8 +336,9 @@ rush it into implementation.
 
 Per-task reviews are task-scoped gates. The broad review happens once, at the
 final whole-branch review. Never skip the task review, and never accept a
-report missing either verdict — spec compliance AND task quality are both
-required. Implementer self-review never replaces the task review; both are
+report missing either verdict. Typed-v1 requires Contract and Invariant
+Compliance plus task quality; legacy requires Spec Compliance plus task
+quality. Implementer self-review never replaces the task review; both are
 needed.
 
 - Hand the reviewer its diff as a file: run this skill's
@@ -322,16 +350,14 @@ needed.
   call. Use the BASE you recorded before dispatching the implementer —
   never `HEAD~1`, which silently truncates multi-commit tasks. Never
   dispatch a task reviewer without a diff file.
-- **Reviewer inputs:** the task reviewer gets three paths — the same brief
-  file, the report file, and the review package — plus the global
-  constraints that bind the task.
-- The global-constraints block you hand the reviewer is its attention
-  lens. Copy the binding requirements verbatim from the plan's Global
-  Constraints section or the spec: exact values, exact formats, and the
-  stated relationships between components ("same layout as X", "matches
-  Y"). The reviewer's template already carries the process rules (YAGNI,
-  test hygiene, review method) — the constraints block is for what THIS
-  project's spec demands.
+- **Reviewer inputs:** the task reviewer gets the explicit Authority Model and
+  three paths — the same brief file, the report file, and the review package —
+  plus any global constraints that bind the task.
+- For typed-v1, the brief's Authority Prelude is the reviewer's attention lens;
+  do not recreate authority from conversation memory. For legacy, copy the
+  binding requirements verbatim from the plan's Global Constraints section or
+  spec. The reviewer's template already carries process rules (YAGNI, test
+  hygiene, review method).
 - Do not add open-ended directives like "check all uses" or "run race tests
   if useful" without a concrete, task-specific reason
 - Do not ask a reviewer to re-run tests the implementer already ran on the
@@ -353,8 +379,13 @@ Template: [task-reviewer-prompt.md](task-reviewer-prompt.md)
 
 ### 4. The fix loop
 
-The loop triggers when the review reports spec ❌, any Critical or Important
-finding, or a ⚠️ item you confirmed as a real gap.
+For typed-v1, first apply blocker eligibility: `HC-*`, `BI-*`, missing `DE-*`,
+violated `NG-*`, or a concrete diff-caused correctness, security,
+compatibility, or data-loss regression. Reclassify everything else as advisory
+and ledger it without a fix dispatch. The loop then triggers on Contract and
+Invariant Compliance ❌, an eligible Critical/Important finding, or a ⚠️ item
+you confirmed as a real authority gap. For legacy, preserve the v6.3 trigger:
+Spec Compliance ❌, any Critical/Important finding, or a confirmed ⚠️ gap.
 
 Before the loop starts, two routes leave it immediately:
 
@@ -363,11 +394,11 @@ Before the loop starts, two routes leave it immediately:
   whole-branch review at that list so it can triage which must be fixed
   before merge. A roll-up nobody reads is a silent discard. Minor findings
   never enter the loop.
-- A finding labeled plan-mandated — or any finding that conflicts with
-  what the plan's text requires — is yours to rule on: weigh the finding
-  against the plan text, decide with the spec as the binding authority, and
-  ledger the ruling before you act on it. Do not dismiss the finding because
-  the plan mandates it, and do not dispatch a fix that contradicts the plan
+- A finding labeled plan-mandated — or any finding that conflicts with what
+  the plan's text requires — is yours to rule on. For typed-v1, weigh it
+  against `HC-*` and `BI-*`; literal `DD-*` adherence cannot make it blocking.
+  For legacy, decide with the spec as binding authority. Ledger the ruling
+  before you act. Do not dispatch a fix that contradicts normative authority
   without a recorded ruling.
 Everything else enters the loop. A fix round is one fix dispatch plus one
 scoped re-review. Five rounds maximum per task:
@@ -451,12 +482,17 @@ printed path in the final review dispatch, so the final reviewer reads
 one file instead of re-deriving the branch diff with git commands. Dispatch
 on the most capable available model (see Model Selection), using
 superpowers:requesting-code-review's
-[code-reviewer.md](../requesting-code-review/code-reviewer.md). Point it at
+[code-reviewer.md](../requesting-code-review/code-reviewer.md). Pass the
+explicit Authority Model. For typed-v1, pass the plan path as the Authority
+Prelude artifact and tell the reviewer to read its pre-task Global Constraints
+and Deviation Policy; for legacy, mark the authority prelude `N/A`. Point it at
 the ledger's deferred-minor and parked lines so it can triage which must be
 fixed before merge.
 
-If the final whole-branch review returns findings, dispatch ONE fix subagent
-with the complete findings list — not one fixer per finding.
+If the final whole-branch review returns findings, apply typed-v1 blocker
+eligibility before dispatch. Advisory findings stay recommendations and never
+enter the fix wave. Dispatch ONE fix subagent with the complete eligible
+findings list — not one fixer per finding.
 Per-finding fixers each rebuild context and re-run suites; a real
 session's final-review fix wave cost more than all its tasks combined.
 Then run exactly one scoped re-review of the fix wave
@@ -490,7 +526,7 @@ Use superpowers:finishing-a-development-branch.
 
 | Excuse | Reality |
 |--------|---------|
-| "Close enough on spec compliance" | Reviewer found spec gaps = not done. Fix or hit the cap and adjudicate — those are the only exits. |
+| "Close enough on compliance" | A legacy spec gap or typed authority gap is not done. Fix or hit the cap and adjudicate; non-authoritative advice never enters the loop. |
 | "I'll fix it myself, dispatching is overhead" | Controller fixes pollute your context and skip review. Resume the implementer. |
 | "One more round will converge" | Past the cap, rounds don't converge — the failure is structural. Adjudicate and route. |
 | "The reviewer will just find something new anyway" | Scoped re-reviews verify fixes; they cannot wander. New findings on untouched code go to the ledger, not the loop. |

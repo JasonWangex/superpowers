@@ -21,6 +21,8 @@ Subagent (general-purpose):
 
     Read the task brief: [BRIEF_FILE]
 
+    **Authority model:** [AUTHORITY_MODEL]
+
     ## The Findings Under Verification
 
     [FINDINGS]
@@ -60,6 +62,14 @@ Subagent (general-purpose):
     outside the fix diff, report it under Out-of-Scope Observations — it
     does not block this task and does not extend the loop. A broad
     whole-branch review happens after all tasks are complete.
+
+    For typed-v1, recheck blocker eligibility before returning a blocking
+    `NOT ADDRESSED` verdict or labeling new breakage Critical/Important. It
+    must cite `HC-*`, `BI-*`, missing `DE-*`, violated `NG-*`, or a concrete
+    diff-caused correctness, security, compatibility, or data-loss regression.
+    Literal `DD-*` divergence and uncited architecture, scalability,
+    documentation, or hardening advice are non-blocking observations. For
+    legacy, preserve the existing full-task/spec behavior.
 
     ## Tests
 
@@ -103,6 +113,7 @@ Subagent (general-purpose):
 **Placeholders:**
 - `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection; scoped
   re-reviews of small fix diffs take a cheap-to-mid tier
+- `[AUTHORITY_MODEL]` — REQUIRED: `typed-v1` or `legacy`, copied from the plan
 - `[BRIEF_FILE]` — the task brief file (same file the implementer worked from)
 - `[FINDINGS]` — the Critical/Important findings and spec gaps from the
   previous review, copied verbatim, one per bullet

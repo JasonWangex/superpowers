@@ -15,6 +15,22 @@ Subagent (general-purpose):
     Read your task brief first: [BRIEF_FILE]
     It contains the full task text from the plan.
 
+    ## Authority
+
+    **Authority model:** [AUTHORITY_MODEL]
+
+    If the model is `typed-v1`, the brief's Authority Prelude is your source of
+    requirements: satisfy every `HC-*` and `BI-*`, produce the named `DE-*`
+    evidence, and do not implement scope forbidden by `NG-*`. A `DD-*` is a
+    design default, not a requirement. You may replace a `DD-*` with a smaller
+    reversible implementation when all normative items still pass; describe
+    the deviation, reason, and evidence in your report so the controller can
+    ledger it. Do not change public compatibility, security, irreversible data
+    behavior, `HC-*`, or `BI-*` without escalating for human approval.
+
+    If the model is `legacy` or untyped, preserve v6.3 behavior: everything the
+    task and binding spec require must be implemented.
+
     ## Context
 
     [Scene-setting: where this fits, dependencies, architectural context]
@@ -32,7 +48,7 @@ Subagent (general-purpose):
     ## Your Job
 
     Once you're clear on requirements:
-    1. Implement exactly what the task specifies
+    1. Implement according to the task's Authority model
     2. Write tests (following TDD if task says to)
     3. Verify implementation works
     4. Commit your work
@@ -79,6 +95,8 @@ Subagent (general-purpose):
 
     **STOP and escalate when:**
     - The task requires architectural decisions with multiple valid approaches
+      and typed-v1 authority does not already permit a smaller reversible
+      Design Default replacement
     - You need to understand code beyond what was provided and can't find clarity
     - You feel uncertain about whether your approach is correct
     - The task involves restructuring existing code in ways the plan didn't anticipate
@@ -94,8 +112,9 @@ Subagent (general-purpose):
     Review your work with fresh eyes. Ask yourself:
 
     **Completeness:**
-    - Did I fully implement everything in the spec?
-    - Did I miss any requirements?
+    - For typed-v1, did I satisfy every `HC-*` and `BI-*` and produce each
+      named `DE-*` without entering `NG-*` scope?
+    - For legacy, did I fully implement everything required by the task and spec?
     - Are there edge cases I didn't handle?
 
     **Quality:**
@@ -136,6 +155,8 @@ Subagent (general-purpose):
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns
+    - For typed-v1, any `DD-*` deviation, its reason, and evidence that the
+      normative items still pass
 
     Then report back with ONLY (under 15 lines — the detail lives in the
     report file):
@@ -152,3 +173,8 @@ Subagent (general-purpose):
     Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
     information that wasn't provided. Never silently produce work you're unsure about.
 ```
+
+**Placeholders:**
+- `[AUTHORITY_MODEL]` — REQUIRED: `typed-v1` when the plan declares
+  `**Authority Model:** typed-v1`; otherwise `legacy`
+- `[BRIEF_FILE]` — generated task brief; for typed-v1 it contains the Authority Prelude

@@ -187,6 +187,7 @@ Claude Code test helpers; no new dependency.
 - Modify: `skills/subagent-driven-development/implementer-prompt.md`
 - Modify: `skills/subagent-driven-development/task-reviewer-prompt.md`
 - Modify: `skills/subagent-driven-development/re-review-prompt.md`
+- Modify: `skills/requesting-code-review/SKILL.md`
 - Modify: `skills/requesting-code-review/code-reviewer.md`
 - Modify: `tests/claude-code/test-typed-spec-authority-content.sh`
 

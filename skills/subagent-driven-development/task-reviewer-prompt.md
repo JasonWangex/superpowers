@@ -22,6 +22,8 @@ Subagent (general-purpose):
 
     Read the task brief: [BRIEF_FILE]
 
+    **Authority model:** [AUTHORITY_MODEL]
+
     Global constraints from the spec/design that bind this task:
     [GLOBAL_CONSTRAINTS]
 
@@ -91,7 +93,7 @@ Subagent (general-purpose):
     Re-running the suite to regenerate what you failed to read is not
     verification; illegibility of the evidence is not invalidation of it.
 
-    ## Part 1: Spec Compliance
+    ## Part 1: Requirements Compliance
 
     Compare the diff against What Was Requested:
 
@@ -102,11 +104,21 @@ Subagent (general-purpose):
     - **Misunderstood:** right feature built the wrong way, wrong problem
       solved
 
-    If the brief lists several files each with its own change (a batched
-    dispatch), check the diff against that list file by file: every listed
-    file must have its corresponding hunk. A listed file the diff never
-    touches is a Missing finding, no matter how clean the rest of the
-    batch looks.
+    For `typed-v1`, use the brief's Authority Prelude and return a Contract and
+    Invariant Compliance verdict. Only `HC-*` and `BI-*` are normative;
+    `DE-*` is required evidence and `NG-*` is forbidden scope. A blocking
+    finding is eligible only when it cites an `HC-*`, `BI-*`, missing `DE-*`,
+    violated `NG-*`, or a concrete diff-caused correctness, security,
+    compatibility, or data-loss regression. Literal divergence from a `DD-*`
+    is not a finding when the replacement is smaller or equally scoped and the
+    normative evidence passes. Architecture, scalability, documentation,
+    hardening, and other uncited improvements are advisory.
+
+    For `legacy`, preserve v6.3 Spec Compliance: if the brief lists several
+    files each with its own change, check the diff against that list file by
+    file. Every listed file must have its corresponding hunk; a listed file the
+    diff never touches is Missing. The whole binding task/spec remains the
+    comparison surface.
 
     If a requirement cannot be verified from this diff alone (it lives in
     unchanged code or spans tasks), report it as a ⚠️ item instead of
@@ -127,7 +139,9 @@ Subagent (general-purpose):
     **Structure:**
     - Does each file have one clear responsibility with a well-defined interface?
     - Are units decomposed so they can be understood and tested independently?
-    - Is the implementation following the file structure from the plan?
+    - For legacy, is the implementation following the file structure from the
+      plan? For typed-v1, does any file-structure deviation break `HC-*` or
+      `BI-*` rather than merely replace a `DD-*`?
     - Did this change create new files that are already large, or
       significantly grow existing files? (Don't flag pre-existing file
       sizes — focus on what this change contributed.)
@@ -155,12 +169,24 @@ Subagent (general-purpose):
     block), that IS a finding — report it as Important, labeled
     plan-mandated. The plan's authorship does not grade its own work; the
     human decides.
+    For typed-v1, Critical and Important additionally require blocker
+    eligibility. A concern that cannot cite `HC-*`, `BI-*`, missing `DE-*`,
+    violated `NG-*`, or a concrete diff-caused regression is advisory even if
+    it would normally be an architectural or maintainability preference.
     Acknowledge what was done well before listing issues — accurate praise
     helps the implementer trust the rest of the feedback.
 
     ## Output Format
 
-    ### Spec Compliance
+    Emit only the compliance heading that matches `[AUTHORITY_MODEL]`; never
+    emit both typed-v1 and legacy verdicts.
+
+    ### Contract and Invariant Compliance (typed-v1 only)
+
+    - ✅ Contract compliant | ❌ Issues found: [violated HC-*/BI-*, missing
+      DE-*, violated NG-*, or eligible diff-caused regression, with file:line]
+
+    ### Spec Compliance (legacy only)
 
     - ✅ Spec compliant | ❌ Issues found: [what's missing/extra/misunderstood,
       with file:line references]
@@ -185,16 +211,18 @@ Subagent (general-purpose):
     **Task quality:** [Approved | Needs fixes]
 
     **Reasoning:** [1-2 sentence technical assessment]
+
+    For typed-v1, advisory-only observations leave Task quality Approved.
 ```
 
 **Placeholders:**
 - `[MODEL]` — REQUIRED: reviewer model per SKILL.md Model Selection
+- `[AUTHORITY_MODEL]` — REQUIRED: `typed-v1` or `legacy`, copied from the plan
 - `[BRIEF_FILE]` — REQUIRED: the task brief file (`scripts/task-brief PLAN N`
   prints the path; same file the implementer worked from)
-- `[GLOBAL_CONSTRAINTS]` — the binding requirements copied verbatim from
-  the plan's Global Constraints section or the spec: exact values, formats,
-  and stated relationships between components (not process rules — those
-  are already in this template)
+- `[GLOBAL_CONSTRAINTS]` — for typed-v1, point to the Authority Prelude in
+  `[BRIEF_FILE]` and add only separately approved constraints; for legacy,
+  copy binding requirements verbatim from the plan or spec
 - `[REPORT_FILE]` — REQUIRED: the file the implementer wrote its detailed
   report to
 - `[BASE_SHA]` — commit before this task
@@ -203,5 +231,6 @@ Subagent (general-purpose):
   package to (`scripts/review-package PLAN_FILE BASE HEAD` prints the unique
   path it wrote; the package never enters the controller's context)
 
-**Reviewer returns:** Spec Compliance verdict (✅/❌/⚠️), Strengths, Issues
+**Reviewer returns:** Contract and Invariant Compliance for typed-v1 or Spec
+Compliance for legacy (✅/❌/⚠️), Strengths, Issues
 (Critical/Important/Minor), Task quality verdict

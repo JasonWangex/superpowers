@@ -36,6 +36,18 @@ require_regex() {
     fi
 }
 
+require_regex_flat() {
+    local file="$1"
+    local pattern="$2"
+    local name="$3"
+    if tr '\n' ' ' < "$REPO_ROOT/$file" | grep -Eqi -- "$pattern"; then
+        pass "$name"
+    else
+        fail "$name"
+        echo "    missing flattened pattern from $file: $pattern"
+    fi
+}
+
 main() {
     echo "=== Test: typed spec authority content ==="
 
@@ -43,6 +55,12 @@ main() {
     local spec_reviewer="skills/brainstorming/spec-document-reviewer-prompt.md"
     local writing_plans="skills/writing-plans/SKILL.md"
     local plan_reviewer="skills/writing-plans/plan-document-reviewer-prompt.md"
+    local sdd="skills/subagent-driven-development/SKILL.md"
+    local implementer="skills/subagent-driven-development/implementer-prompt.md"
+    local task_reviewer="skills/subagent-driven-development/task-reviewer-prompt.md"
+    local rereviewer="skills/subagent-driven-development/re-review-prompt.md"
+    local final_reviewer="skills/requesting-code-review/code-reviewer.md"
+    local requesting_review="skills/requesting-code-review/SKILL.md"
 
     require_literal "$brainstorming" "Authority Model: typed-v1" \
         "brainstorming emits the typed-v1 marker"
@@ -87,6 +105,60 @@ main() {
         "plan reviewer checks typed normative coverage"
     require_regex "$plan_reviewer" 'DD-\*.*(not.*missing|not.*require|replaceable|advisory)' \
         "plan reviewer does not require Design Defaults literally"
+
+    require_literal "$sdd" "**Authority Model:** typed-v1" \
+        "SDD detects the typed authority model"
+    require_regex_flat "$sdd" '(task brief|authority prelude).*(binding authority|source of requirements)|(binding authority|source of requirements).*(task brief|authority prelude)' \
+        "SDD makes the typed brief the execution authority"
+    require_regex_flat "$sdd" 'Contract and[[:space:]]+Invariant Compliance' \
+        "SDD names the typed review verdict"
+    require_regex_flat "$sdd" 'DD-\*.*smaller.*reversible.*(allowed|implement)|smaller.*reversible.*DD-\*' \
+        "SDD permits smaller reversible Design Default deviations"
+    require_regex "$sdd" '(untyped|legacy).*spec.*binding authority|spec.*binding authority.*(untyped|legacy)' \
+        "SDD preserves legacy binding-spec behavior"
+    require_regex_flat "$sdd" 'HC-\*.*BI-\*.*DE-\*.*NG-\*.*diff-caused|diff-caused.*HC-\*.*BI-\*.*DE-\*.*NG-\*' \
+        "SDD defines typed blocker eligibility"
+
+    require_literal "$implementer" "[AUTHORITY_MODEL]" \
+        "implementer receives an explicit authority model"
+    require_regex_flat "$implementer" 'DD-\*.*smaller.*reversible|smaller.*reversible.*DD-\*' \
+        "implementer may choose a smaller Design Default replacement"
+    require_regex "$implementer" 'NG-\*.*(do not implement|forbidden)|forbidden.*NG-\*' \
+        "implementer refuses forbidden scope"
+    require_regex "$implementer" '(untyped|legacy).*everything.*task|everything.*task.*(untyped|legacy)' \
+        "implementer keeps legacy exact-task behavior"
+
+    require_literal "$task_reviewer" "[AUTHORITY_MODEL]" \
+        "task reviewer receives an explicit authority model"
+    require_literal "$task_reviewer" "Contract and Invariant Compliance" \
+        "task reviewer emits the typed verdict"
+    require_regex_flat "$task_reviewer" 'DD-\*.*(not a finding|non-blocking|advisory)' \
+        "task reviewer does not block on Design Default divergence"
+    require_regex_flat "$task_reviewer" 'HC-\*.*BI-\*.*DE-\*.*NG-\*.*diff-caused|diff-caused.*HC-\*.*BI-\*.*DE-\*.*NG-\*' \
+        "task reviewer gates blockers on typed authority"
+
+    require_literal "$rereviewer" "[AUTHORITY_MODEL]" \
+        "re-reviewer receives an explicit authority model"
+    require_regex "$rereviewer" 'typed-v1.*(eligible|eligibility).*blocking|blocking.*(eligible|eligibility).*typed-v1' \
+        "re-reviewer rechecks typed blocker eligibility"
+
+    require_literal "$final_reviewer" "[AUTHORITY_MODEL]" \
+        "final reviewer receives an explicit authority model"
+    require_literal "$final_reviewer" "[AUTHORITY_PRELUDE]" \
+        "final reviewer receives typed authority text"
+    require_regex "$final_reviewer" 'DD-\*.*(not a finding|non-blocking|advisory)' \
+        "final reviewer does not block on Design Default divergence"
+    require_regex_flat "$final_reviewer" 'HC-\*.*BI-\*.*DE-\*.*NG-\*.*diff-caused|diff-caused.*HC-\*.*BI-\*.*DE-\*.*NG-\*' \
+        "final reviewer gates blockers on typed authority"
+
+    require_literal "$requesting_review" "{AUTHORITY_MODEL}" \
+        "requesting-code-review fills the authority model"
+    require_literal "$requesting_review" "{AUTHORITY_PRELUDE}" \
+        "requesting-code-review fills the authority artifact"
+    require_regex_flat "$requesting_review" 'typed-v1.*(blocker eligibility|HC-\*.*BI-\*)' \
+        "requesting-code-review filters typed findings"
+    require_regex "$requesting_review" '(legacy|untyped).*(existing|v6\.3|full.*review)' \
+        "requesting-code-review preserves legacy review behavior"
 
     echo ""
     if [[ "$FAILURES" -ne 0 ]]; then

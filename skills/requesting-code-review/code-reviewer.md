@@ -20,6 +20,23 @@ Subagent (general-purpose):
 
     [PLAN_OR_REQUIREMENTS]
 
+    ## Authority
+
+    **Authority model:** [AUTHORITY_MODEL]
+    **Authority Prelude:** [AUTHORITY_PRELUDE]
+
+    For `typed-v1`, read the Authority Prelude artifact before reviewing. Only
+    `HC-*` and `BI-*` are normative; `DE-*` is required evidence and `NG-*`
+    forbids scope. A Critical or Important finding is eligible only when it
+    cites an `HC-*`, `BI-*`, missing `DE-*`, violated `NG-*`, or a concrete
+    diff-caused correctness, security, compatibility, or data-loss regression.
+    Literal divergence from a `DD-*` is not a finding when the replacement is
+    smaller or equally scoped and the normative evidence passes. Uncited
+    architecture, scalability, documentation, optimization, generalized
+    platform, and hardening suggestions are advisory recommendations.
+
+    For `legacy`, preserve the existing full plan/spec review behavior.
+
     ## Git Range to Review
 
     **Base:** [BASE_SHA]
@@ -47,7 +64,9 @@ Subagent (general-purpose):
 
     **Plan alignment:**
     - Does the implementation match the plan / requirements?
-    - Are deviations justified improvements, or problematic departures?
+    - Under typed-v1, does a deviation break authority or only replace a
+      `DD-*`? Under legacy, is it a justified improvement or a problematic
+      departure?
     - Is all planned functionality present?
 
     **Code quality:**
@@ -86,6 +105,13 @@ Subagent (general-purpose):
     If you find issues with the plan itself rather than the implementation,
     say so.
 
+    For typed-v1, apply blocker eligibility before assigning Critical or
+    Important and before setting `Ready to merge` to No/With fixes. Advice that
+    fails the eligibility test belongs only in Recommendations and does not
+    enter a fix wave. Code quality still matters: concrete diff-caused
+    correctness, security, compatibility, and data-loss regressions remain
+    blockers even when no authority ID anticipated them.
+
     ## Output Format
 
     ### Strengths
@@ -109,7 +135,8 @@ Subagent (general-purpose):
     - How to fix (if not obvious)
 
     ### Recommendations
-    [Improvements for code quality, architecture, or process]
+    [Advisory improvements for code quality, architecture, or process; these do
+    not block typed-v1 delivery unless separately listed as an eligible issue]
 
     ### Assessment
 
@@ -137,6 +164,9 @@ Subagent (general-purpose):
 **Placeholders:**
 - `[DESCRIPTION]` — brief summary of what was built
 - `[PLAN_OR_REQUIREMENTS]` — what it should do (plan file path, task text, or requirements)
+- `[AUTHORITY_MODEL]` — REQUIRED: `typed-v1` or `legacy`
+- `[AUTHORITY_PRELUDE]` — REQUIRED: for typed-v1, an artifact path containing
+  the plan's pre-task Global Constraints and Deviation Policy; for legacy, `N/A`
 - `[BASE_SHA]` — starting commit
 - `[HEAD_SHA]` — ending commit
 
