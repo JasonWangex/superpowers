@@ -27,7 +27,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 ### Authority Models
 
-**typed-v1:** Before each task, run the sibling `../subagent-driven-development/scripts/task-brief PLAN_FILE TASK_NUMBER` script (resolved from this skill's directory), then read the generated brief. The task brief's Authority Prelude is the source of requirements and execution authority for that task.
+**typed-v1:** Resolve and read the plan's `**Spec:**` file, then verify that its Human Contract is marked `APPROVED`. If the spec is missing or unreachable, or the Human Contract is not approved, stop and fail closed before executing any task. Before each task, run the sibling `../subagent-driven-development/scripts/task-brief PLAN_FILE TASK_NUMBER` script (resolved from this skill's directory), then read the generated brief. The task brief's Authority Prelude is the source of requirements and execution authority for that task.
 
 - `HC-*` and `BI-*` are normative requirements.
 - `DE-*` is required evidence; `NG-*` is forbidden scope.

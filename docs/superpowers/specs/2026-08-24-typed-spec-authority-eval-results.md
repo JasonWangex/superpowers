@@ -91,12 +91,16 @@ spec-detail traps (5/5) and retained the same 1/5 platform-block distribution.
 - carry the explicit authority model and spec path;
 - include only the task's referenced `HC-*`, `BI-*`, `NG-*`, and `DE-*`;
 - carry its `DD-*` text and deviation policy;
-- reject missing authority fields or an empty inline spec path; and
+- reject missing, empty, cross-namespace, or nonexistent authority references;
+- invalidate a previous brief after any failed regeneration, including a
+  missing plan; and
 - leave legacy task-only output unchanged.
 
 `tests/claude-code/test-typed-spec-authority-content.sh` checks all authoring,
 execution, task-review, re-review, and final-review endpoints for the typed
-authority and blocker contracts.
+authority and blocker contracts. It also requires both supported execution
+routes to stop when the source spec is unreachable or its Human Contract is
+not marked APPROVED.
 
 ## Interpretation and Limit
 

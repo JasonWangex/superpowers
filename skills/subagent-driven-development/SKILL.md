@@ -176,10 +176,11 @@ a ledger file, not only in todos.
 Read the plan once, detect its Authority Model, note its context and Global
 Constraints, and create a todo per task. If the plan names a Spec, read that
 too. For typed-v1, verify its Human Contract is marked APPROVED and resolve
-conflicts against `HC-*` and `BI-*`; the remaining spec is design context. For
-legacy plans, the whole spec remains the binding authority. A plan with no
-reachable spec gets a ledger note saying so — rulings made without one are
-provisional.
+conflicts against `HC-*` and `BI-*`; the remaining spec is design context. If
+a typed-v1 plan's spec is missing or unreachable, or its Human Contract is not
+approved, stop and fail closed before dispatching any task. For legacy plans,
+the whole spec remains the binding authority; a legacy plan with no reachable
+spec gets a ledger note saying so, and rulings made without one are provisional.
 
 Before dispatching Task 1, scan the plan once for conflicts, writing down
 what you checked as you check it:

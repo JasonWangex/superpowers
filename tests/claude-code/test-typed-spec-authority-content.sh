@@ -111,6 +111,10 @@ main() {
         "executing-plans detects the typed authority model"
     require_literal "$executing_plans" "task-brief" \
         "executing-plans compiles a typed authority brief"
+    require_regex_flat "$executing_plans" 'typed-v1.*(read|resolve).*(spec|Spec).*(Human Contract).*(APPROVED)|(Human Contract).*(APPROVED).*typed-v1' \
+        "executing-plans verifies the typed Human Contract approval"
+    require_regex_flat "$executing_plans" '(spec.*(missing|unreachable)|missing.*spec|unreachable.*spec).*(stop|fail closed)|(stop|fail closed).*(spec.*(missing|unreachable)|missing.*spec|unreachable.*spec)' \
+        "executing-plans fails closed when the typed spec cannot be verified"
     require_regex_flat "$executing_plans" '(task brief|authority prelude).*(execution authority|source of requirements)|(execution authority|source of requirements).*(task brief|authority prelude)' \
         "executing-plans makes the typed brief the execution authority"
     require_regex_flat "$executing_plans" 'DD-\*.*smaller.*reversible.*(allowed|implement)|smaller.*reversible.*DD-\*' \
@@ -130,6 +134,8 @@ main() {
         "SDD permits smaller reversible Design Default deviations"
     require_regex "$sdd" '(untyped|legacy).*spec.*binding authority|spec.*binding authority.*(untyped|legacy)' \
         "SDD preserves legacy binding-spec behavior"
+    require_regex_flat "$sdd" 'typed-v1.*(missing|unreachable).*spec.*(stop|fail closed)|(stop|fail closed).*typed-v1.*(missing|unreachable).*spec' \
+        "SDD fails closed when typed approval cannot be verified"
     require_regex_flat "$sdd" 'HC-\*.*BI-\*.*DE-\*.*NG-\*.*diff-caused|diff-caused.*HC-\*.*BI-\*.*DE-\*.*NG-\*' \
         "SDD defines typed blocker eligibility"
 

@@ -372,6 +372,32 @@ PLAN
         echo "    exit: $rc; bytes: $(wc -c < "$reused_brief" 2>/dev/null || printf '?')"
     fi
 
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan.md 1 "$reused_brief" >/dev/null)
+    mv "$repo/typed-plan.md" "$repo/typed-plan.saved"
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan.md 1 "$reused_brief" >/dev/null 2>&1) || rc=$?
+    mv "$repo/typed-plan.saved" "$repo/typed-plan.md"
+    if [[ "$rc" -eq 2 && -e "$reused_brief" && ! -s "$reused_brief" ]]; then
+        pass "missing plan invalidates an explicit stale brief"
+    else
+        fail "missing plan invalidates an explicit stale brief"
+        echo "    exit: $rc; bytes: $(wc -c < "$reused_brief" 2>/dev/null || printf '?')"
+    fi
+
+    local missing_default_out missing_default_path
+    missing_default_out="$(cd "$repo" && "$SDD_SCRIPTS/task-brief" plan-b.md 1)"
+    missing_default_path="$(printf '%s\n' "$missing_default_out" | sed -n 's/^wrote \(.*\): [0-9][0-9]* lines$/\1/p')"
+    mv "$repo/plan-b.md" "$repo/plan-b.saved"
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" plan-b.md 1 >/dev/null 2>&1) || rc=$?
+    mv "$repo/plan-b.saved" "$repo/plan-b.md"
+    if [[ "$rc" -eq 2 && -e "$missing_default_path" && ! -s "$missing_default_path" ]]; then
+        pass "missing plan invalidates its default stale brief"
+    else
+        fail "missing plan invalidates its default stale brief"
+        echo "    exit: $rc; bytes: $(wc -c < "$missing_default_path" 2>/dev/null || printf '?')"
+    fi
+
     # --- review-package takes the plan first and lands in its directory ---
     local git_id=(-c user.email=t@example.com -c user.name=t -c commit.gpgsign=false)
     ( cd "$repo" \

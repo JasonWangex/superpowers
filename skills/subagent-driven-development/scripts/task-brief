@@ -16,17 +16,28 @@ fi
 
 plan=$1
 n=$2
-[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
 
 if [ $# -eq 3 ]; then
   out=$3
-else
+elif [ -f "$plan" ]; then
   dir=$("$(cd "$(dirname "$0")" && pwd)/sdd-workspace" "$plan")
   out="$dir/task-${n}-brief.md"
+else
+  # A prior default brief can outlive a deleted plan. Reconstruct its path so
+  # this failed regeneration can invalidate it before reporting the missing
+  # input. Do not create a workspace for a plan that does not exist.
+  slug=$(basename "$plan" .md)
+  [ -n "$slug" ] && [ "$slug" != "." ] && [ "$slug" != ".." ] \
+    || { echo "cannot derive a workspace name from: $plan" >&2; exit 2; }
+  root=$(git rev-parse --show-toplevel 2>/dev/null) \
+    || { echo "no such plan file: $plan" >&2; exit 2; }
+  out="$root/.superpowers/sdd/$slug/task-${n}-brief.md"
 fi
 
 # Invalidate any previous brief before parsing. If regeneration fails, callers
 # must see an empty artifact rather than accidentally executing stale authority.
+if [ -e "$out" ]; then : > "$out"; fi
+[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
 : > "$out"
 
 task_tmp=$(mktemp)

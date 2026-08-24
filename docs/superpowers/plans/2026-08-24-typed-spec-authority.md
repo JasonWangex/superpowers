@@ -322,10 +322,13 @@ Claude Code test helpers; no new dependency.
 
 - [ ] **Step 3: Implement the narrow fixes**
 
-  Make inline execution consume `task-brief`; validate `Contract Coverage` as
-  only `HC-*`/`BI-*`, evidence as `DE-*` or `None`, forbidden scope as `NG-*`
-  or `None`, and defaults as `DD-*` or `None`; invalidate an old output before
-  parsing while retaining atomic success writes.
+  Make both execution routes stop unless the typed plan's source spec is
+  reachable and its Human Contract is marked APPROVED. Make inline execution
+  consume `task-brief`; validate `Contract Coverage` as only `HC-*`/`BI-*`,
+  evidence as `DE-*` or `None`, forbidden scope as `NG-*` or `None`, and
+  defaults as `DD-*` or `None`; invalidate an old output before parsing,
+  including when the plan has disappeared, while retaining atomic success
+  writes.
 
 - [ ] **Step 4: Run focused and repository regression tests**
 
