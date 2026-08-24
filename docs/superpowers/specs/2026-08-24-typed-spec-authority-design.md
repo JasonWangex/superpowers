@@ -1,11 +1,11 @@
 # Typed Spec Authority — Design
 
 Date: 2026-08-24
-Status: draft for human review
+Status: Human Contract and Binding Invariants approved by Jason on 2026-08-24
 Branch: `feature/typed-spec-authority`
 Authority Model: typed-v1
 
-## Human Contract — FOR REVIEW
+## Human Contract — APPROVED
 
 ### Outcome
 
