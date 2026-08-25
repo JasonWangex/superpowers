@@ -72,7 +72,7 @@ The existing request path reads the value and adds it to the current response.
 
 ### Technical Architecture
 
-The existing service and serializer remain the implementation boundary.
+The existing service and serializer remain the implementation boundary described by BI-1, without promoting this summary sentence to authority.
 
 ### Key Technology Choices
 
@@ -117,6 +117,40 @@ The contract test passes without changing existing response fields.
 **Design Defaults:** DD-1 — split the service into three classes; replaceable under the deviation policy.
 
 Add the response field with the smallest conforming change.
+PLAN
+    cat > "$repo/typed-plan-partial-summary.md" <<'PLAN'
+# Invalid Typed Plan
+
+**Spec:** `docs/superpowers/specs/example.md`
+**Authority Model:** typed-v1
+
+## Mission and Architecture Summary — Non-normative
+
+### Ultimate Goal
+
+Preserve the public response while delivering the requested field.
+
+### Current Problem
+
+The current response does not expose the requested field.
+
+## Global Constraints
+- HC-1: Preserve the public response.
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+- NG-1: Do not refactor unrelated behavior.
+- DE-1: Contract tests pass.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed.
+
+---
+
+### Task 1: Invalid typed task
+
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Forbidden Scope:** NG-1
+**Design Defaults:** None.
 PLAN
     cat > "$repo/typed-plan-pre-summary.md" <<'PLAN'
 # Typed Plan From Before the Summary Extension
@@ -263,6 +297,30 @@ PLAN
 ### Ultimate Goal
 
 Validate authority field namespaces without importing unrelated architecture.
+
+### Current Problem
+
+Typed task fields must reject IDs from the wrong authority namespace.
+
+### End-to-End Flow
+
+The helper reads a typed plan, validates one task, and writes its brief.
+
+### Technical Architecture
+
+The shell helper remains the single task-brief compilation boundary.
+
+### Key Technology Choices
+
+Reuse the existing text format and shell implementation.
+
+### Scope and Trade-offs
+
+Validate task authority fields without adding a separate parser dependency.
+
+### Definition of Success
+
+Valid namespace combinations produce a brief and invalid combinations fail.
 
 ## Global Constraints
 - HC-1: Preserve the public response.
@@ -413,7 +471,7 @@ PLAN
     for excluded_summary_text in \
         "The current response does not expose the requested field." \
         "The existing request path reads the value" \
-        "The existing service and serializer remain" \
+        "The existing service and serializer remain the implementation boundary described by BI-1" \
         "Reuse the current storage and service" \
         "Favor a local reversible change" \
         "The contract test passes without changing"; do
@@ -456,6 +514,15 @@ PLAN
         pass "typed plan with a summary but an empty Ultimate Goal errors with exit 4"
     else
         fail "typed plan with a summary but an empty Ultimate Goal errors with exit 4"
+        echo "    exit: $rc"
+    fi
+
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan-partial-summary.md 1 >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 4 ]]; then
+        pass "typed plan with an incomplete seven-part summary errors with exit 4"
+    else
+        fail "typed plan with an incomplete seven-part summary errors with exit 4"
         echo "    exit: $rc"
     fi
 

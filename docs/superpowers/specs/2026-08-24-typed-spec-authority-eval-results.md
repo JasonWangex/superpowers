@@ -134,7 +134,9 @@ Task propagation is tested mechanically rather than inferred from prose. The
 task-brief regression test proves the exact `Ultimate Goal` is present while
 sentences from each of the other six summary sections are absent. It also
 proves pre-extension typed plans still run without an invented goal and a
-present-but-empty goal fails closed.
+present-but-incomplete seven-part summary fails closed. A summary sentence that
+cites an authority ID is also excluded; authority lines are compiled only from
+the plan's Global Constraints section.
 
 ## Mechanical Evidence
 

@@ -305,7 +305,7 @@ not enter the fix wave.
 - `typed-v1` is selected only by an explicit header.
 - Typed plans created before the summary extension remain executable and do
   not invent an `Ultimate Goal`; newly authored plans carry the summary, and a
-  present-but-empty `Ultimate Goal` fails closed.
+  present but incomplete or empty seven-part summary fails closed.
 - A legacy spec may be migrated only by creating and approving its Human
   Contract and Binding Invariants; no automatic relabeling occurs.
 - Existing plan/task helpers accept both formats.
