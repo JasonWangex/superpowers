@@ -175,14 +175,25 @@ a ledger file, not only in todos.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch); if
   that happens, recover from `git log`.
 
-Read the plan once, detect its Authority Model, note its context and Global
-Constraints, and create a todo per task. If the plan names a Spec, read that
-too. For typed-v1, verify its Human Contract is marked APPROVED and resolve
+Read the plan once, detect its Authority Model, and note its context and Global
+Constraints. If the plan names a Spec, read that too. For typed-v1, verify its
+Human Contract is marked APPROVED and resolve
 conflicts against `HC-*` and `BI-*`; the remaining spec is design context. If
 a typed-v1 plan's spec is missing or unreachable, or its Human Contract is not
 approved, stop and fail closed before dispatching any task. For legacy plans,
 the whole spec remains the binding authority; a legacy plan with no reachable
 spec gets a ledger note saying so, and rulings made without one are provisional.
+
+Unless the human's current request is explicitly a separate production release
+or publication task, exclude any plan task that deploys or mutates production,
+enables live traffic/features/ads, submits an app to a store, or executes
+production rollout monitoring or rollback. Record one ledger line that it is
+outside the development plan and continue the remaining tasks; do not dispatch
+it or ask whether to continue. Its presence in a spec, `DE-*`, plan, or earlier
+development approval is not release authorization.
+
+After applying that boundary, create a todo only for each remaining
+development task.
 
 Before dispatching Task 1, scan the plan once for conflicts, writing down
 what you checked as you check it:

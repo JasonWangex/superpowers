@@ -22,6 +22,20 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+### Development Boundary
+
+Unless the human's current request is explicitly a separate production release
+or publication task, an implementation plan ends after code, automated
+verification, and any explicitly authorized non-production test-environment
+acceptance. Production deployment, production data or configuration changes,
+live traffic/feature/ad enablement, app-store submission, and production rollout
+monitoring or rollback execution never become numbered development tasks.
+
+If the spec includes that release work, preserve it only as one line:
+`Production release: outside this plan; requires a separate user request.` Do
+not expand it into steps, commands, a runbook, or a task. A later explicit
+release request is a separate task; this boundary does not authorize it.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
@@ -164,7 +178,8 @@ git commit -m "feat: add specific feature"
 
 ### typed-v1 Plan Compilation
 
-For typed-v1, map every `HC-*`, `BI-*`, and `DE-*` item to at least one task.
+For typed-v1, map every `HC-*`, `BI-*`, and `DE-*` item to at least one task,
+except production-release evidence excluded by the Development Boundary above.
 `DD-*` guides the proposed implementation but remains replaceable. `INFO-*` and `NG-*` never generate a task; cite relevant `NG-*` under `Forbidden Scope`
 instead. An infrastructure or enabling task cites the contract items and done
 evidence it enables—it does not create authority for itself.
@@ -188,18 +203,23 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
 
-**1. Authority coverage:** For typed-v1, map every `HC-*`, `BI-*`, and `DE-*`
-to a task and confirm no task exists only for `DD-*`, `INFO-*`, or `NG-*`.
+**1. Authority coverage and development boundary:** For typed-v1, map every
+`HC-*`, `BI-*`, and `DE-*` to a task except production-release evidence, and
+confirm no task exists only for `DD-*`, `INFO-*`, or `NG-*`. Confirm the plan
+contains no production release task unless the current request is explicitly a
+separate release task.
 Confirm the Mission and Architecture Summary is an exact verbatim copy of the
 spec section, not a second summary written for the plan.
 For an untyped legacy spec, keep the existing full-spec check: every spec
-section and requirement must map to a task. List any gaps.
+section and requirement must map to a task, subject to the same Development
+Boundary. List any gaps.
 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+If you find issues, fix them inline. No need to re-review — just fix and move
+on. If you find a non-release spec requirement with no task, add the task.
 
 ## Execution Handoff
 

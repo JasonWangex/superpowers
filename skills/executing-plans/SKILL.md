@@ -21,9 +21,15 @@ Load plan, review critically, execute all tasks, report when complete.
 3. Detect the authority model:
    - If the header contains `**Authority Model:** typed-v1`, use the typed-v1 path below
    - Otherwise use the legacy/untyped path
-4. Review critically - identify any questions or concerns about the plan
-5. If concerns: Raise them with your human partner before starting
-6. If no concerns: Create todos for the plan items and proceed
+4. Apply the development boundary: unless the human's current request is
+   explicitly a separate production release or publication task, exclude any
+   task that deploys or mutates production, enables live traffic/features/ads,
+   submits an app to a store, or executes production rollout monitoring or
+   rollback. Note once that it requires a separate user request. A spec,
+   `DE-*`, plan, or earlier development approval does not authorize release.
+5. Review the remaining tasks critically - identify any questions or concerns
+6. If concerns: Raise them with your human partner before starting
+7. If no concerns: Create todos for the remaining tasks and proceed
 
 ### Authority Models
 
