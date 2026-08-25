@@ -60,6 +60,8 @@ independently testable deliverable.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+<!-- Legacy/untyped only; typed-v1 replaces these three fields with the
+verbatim Mission and Architecture Summary from its spec. -->
 **Goal:** [One sentence describing what this builds]
 
 **Architecture:** [2-3 sentences about approach]
@@ -87,6 +89,14 @@ after `**Spec:**`:
 ```markdown
 **Authority Model:** typed-v1
 ```
+
+For typed-v1, replace the legacy `Goal`, `Architecture`, and `Tech Stack`
+fields with the complete `## Mission and Architecture Summary — Non-normative`
+section copied verbatim from the spec. Copy its heading, note, and all seven
+subsections without rewriting, shortening, or normalizing them. Place it after
+the Authority Model and before Global Constraints. The summary is context, not
+authority: it does not generate tasks or review findings, and any conflict is
+resolved in favor of approved `HC-*` and `BI-*`.
 
 In `Global Constraints`, copy the exact approved `HC-*` and `BI-*` text. Also
 include the spec's `NG-*`, `DE-*`, and the standard Deviation Policy so
@@ -180,6 +190,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **1. Authority coverage:** For typed-v1, map every `HC-*`, `BI-*`, and `DE-*`
 to a task and confirm no task exists only for `DD-*`, `INFO-*`, or `NG-*`.
+Confirm the Mission and Architecture Summary is an exact verbatim copy of the
+spec section, not a second summary written for the plan.
 For an untyped legacy spec, keep the existing full-spec check: every spec
 section and requirement must map to a task. List any gaps.
 

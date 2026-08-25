@@ -24,6 +24,11 @@ Subagent (general-purpose):
     Design Defaults fields. A task may cite `NG-*` as forbidden scope, but
     `INFO-*` and `NG-*` never generate work.
 
+    Verify the plan's complete Mission and Architecture Summary is an exact,
+    verbatim copy of the spec section. It replaces the typed plan's legacy
+    Goal, Architecture, and Tech Stack fields, remains non-normative, and must
+    not generate tasks or findings independently of typed authority.
+
     `DD-*` is replaceable and is not a missing requirement when a plan chooses
     a smaller route that preserves `HC-*` and `BI-*`. Flag a Design Default
     only if the plan mistakenly treats it as normative or the replacement

@@ -148,10 +148,37 @@ This default prevents AI-authored detail from silently acquiring authority.
 
 ## Spec Shape
 
-A typed architectural spec begins with this compact structure:
+A typed architectural spec begins with a human-readable integration layer,
+followed by the compact authority structure:
 
 ```markdown
 Authority Model: typed-v1
+
+## Mission and Architecture Summary — Non-normative
+
+> Human-readable context only. This section does not create authority;
+> normative requirements remain in HC/BI.
+
+### Ultimate Goal
+[the task's end state and why it matters]
+
+### Current Problem
+[the present gap or failure]
+
+### End-to-End Flow
+[the user/system flow from input to observable outcome]
+
+### Technical Architecture
+[major components, boundaries, and data flow]
+
+### Key Technology Choices
+[selected technologies and why they fit]
+
+### Scope and Trade-offs
+[what is deliberately included, excluded, and accepted]
+
+### Definition of Success
+[how the result will be recognized]
 
 ## Human Contract — APPROVED
 
@@ -177,6 +204,12 @@ Authority Model: typed-v1
 - INFO-1: [example, alternative, or future idea]
 ```
 
+The summary is the readable answer to “what are we building, how does it fit
+together, and what result are we pursuing?” It integrates the scattered typed
+items without replacing them. Every claim must trace to the approved contract,
+binding invariants, or explicitly labeled non-normative design material; the
+summary cannot create a requirement that is absent from `HC-*` or `BI-*`.
+
 The Human Contract and Binding Invariants are normative. The rest of the spec
 is a design proposal and decision record.
 
@@ -184,6 +217,8 @@ is a design proposal and decision record.
 
 For a `typed-v1` spec, `writing-plans` changes its coverage rule:
 
+- copy the complete `Mission and Architecture Summary` verbatim into the plan,
+  replacing the legacy short `Goal`, `Architecture`, and `Tech Stack` header;
 - every `HC-*`, `BI-*`, and `DE-*` item maps to at least one task;
 - `DD-*` items guide the proposed task implementation but are not mandatory;
 - `INFO-*` and `NG-*` items never create work;
@@ -210,6 +245,7 @@ must prepend a compact authority prelude containing:
 
 - the authority model;
 - the Human Contract path or spec path;
+- only the exact `Ultimate Goal`, labeled non-binding Mission Context;
 - the task's normative `HC-*` and `BI-*` text;
 - relevant non-goals and done evidence;
 - the deviation policy for `DD-*` items.
@@ -217,6 +253,11 @@ must prepend a compact authority prelude containing:
 The same generated brief remains the implementer's source of requirements and
 the task reviewer's scope. The implementer prompt receives an explicit
 authority field rather than relying on scene-setting prose.
+
+The other six summary sections deliberately stop at the plan. Passing the full
+architecture narrative to every task would give implementation agents more
+non-binding detail to elaborate and could recreate the scope-expansion failure
+this authority model is intended to prevent.
 
 ## Deviation Policy
 
@@ -262,6 +303,9 @@ not enter the fix wave.
 
 - Untyped specs and plans keep v6.3 behavior.
 - `typed-v1` is selected only by an explicit header.
+- Typed plans created before the summary extension remain executable and do
+  not invent an `Ultimate Goal`; newly authored plans carry the summary, and a
+  present-but-empty `Ultimate Goal` fails closed.
 - A legacy spec may be migrated only by creating and approving its Human
   Contract and Binding Invariants; no automatic relabeling occurs.
 - Existing plan/task helpers accept both formats.

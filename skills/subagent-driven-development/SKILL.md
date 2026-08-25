@@ -40,7 +40,9 @@ Detect `**Authority Model:** typed-v1` in the plan header.
   `DD-*` is allowed when every relevant `HC-*` and `BI-*` remains satisfied;
   ledger the deviation, reason, and evidence. Changing `HC-*`, `BI-*`, public
   compatibility, security, or irreversible data behavior still stops for
-  human approval.
+  human approval. The task brief also carries `Mission Context` containing
+  only the spec's exact `Ultimate Goal`; it is non-binding context that explains
+  purpose without importing the rest of the architecture into task scope.
 - **Legacy/untyped:** preserve v6.3 behavior. The spec is the binding authority
   and the plan is its argument; everything the task requires remains required.
 

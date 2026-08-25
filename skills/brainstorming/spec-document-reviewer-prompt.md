@@ -28,6 +28,13 @@ Subagent (general-purpose):
     `FOR REVIEW` Human Contract is valid at this stage; the human approval gate
     happens after this review.
 
+    The Mission and Architecture Summary must be complete, readable,
+    consistent with the typed sections, and explicitly non-normative. Verify
+    all seven subsections are present, its Ultimate Goal is understandable
+    without reading the ID lists, and it introduces no authority absent from
+    `HC-*` or `BI-*`. Technology choices described there must agree with the
+    relevant `DD-*`; contradictions are issues, while prose style is advisory.
+
     If `Authority Model: typed-v1` is absent, use the legacy behavior below:
     review the whole spec as the implementation-planning authority.
 
@@ -37,7 +44,7 @@ Subagent (general-purpose):
     |----------|------------------|
     | Completeness | TODOs, placeholders, "TBD", incomplete sections |
     | Consistency | Internal contradictions, conflicting requirements |
-    | Clarity | Requirements ambiguous enough to cause someone to build the wrong thing |
+    | Clarity | Requirements ambiguous enough to cause someone to build the wrong thing; summary fails to explain the integrated goal or architecture |
     | Scope | Focused enough for a single plan — not covering multiple independent subsystems |
     | YAGNI | Unrequested features, over-engineering |
 

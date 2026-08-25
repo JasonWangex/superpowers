@@ -208,6 +208,32 @@ New architectural specs use this compact opening before design detail:
 ```markdown
 Authority Model: typed-v1
 
+## Mission and Architecture Summary — Non-normative
+
+> Human-readable context only. This section does not create authority;
+> normative requirements remain in `HC-*` and `BI-*`.
+
+### Ultimate Goal
+[what outcome this work ultimately creates for the user or system]
+
+### Current Problem
+[why the current state fails and what central problem must change]
+
+### End-to-End Flow
+[plain-language path from entry to observable result]
+
+### Technical Architecture
+[components, responsibilities, boundaries, and data flow]
+
+### Key Technology Choices
+[chosen technologies or patterns, why they fit, and material alternatives rejected]
+
+### Scope and Trade-offs
+[what this work includes, excludes, and deliberately accepts]
+
+### Definition of Success
+[plain-language view of the completed outcome; exact evidence remains in `DE-*`]
+
 ## Human Contract — FOR REVIEW
 
 ### Outcome
@@ -239,6 +265,14 @@ smaller reversible design that preserves every relevant `HC-*` and `BI-*`.
 instead of implementation. Unlabeled prose is informative; never let an
 AI-authored design sentence acquire authority merely by appearing in the spec.
 
+The Mission and Architecture Summary is the human-readable integration layer
+over those distributed items. Write it in plain language after the design is
+settled, keep all seven subsections, and connect important statements to the
+matching `HC-*`, `BI-*`, `DD-*`, `NG-*`, or `DE-*` where useful. It is
+non-normative and must not introduce a requirement or design decision that is
+absent from the typed sections below it. Its `Ultimate Goal` is one compact
+paragraph that can travel to task agents without carrying the full architecture.
+
 The Human Contract stays short enough for real human review. Promoting or
 changing an `HC-*` or `BI-*` item requires explicit user approval. Design
 discussion can still be detailed, but put internal APIs, class splits,
@@ -256,7 +290,7 @@ unless the human explicitly approves one as a binding invariant.
 After writing the spec document, look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
+2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions? Does the Mission and Architecture Summary explain the typed sections without adding authority?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
 
@@ -268,7 +302,9 @@ and Binding Invariants, not the whole AI-authored document:
 
 > "Typed spec written to `<path>`. Please review the Human Contract (`HC-*`,
 > `NG-*`, `DE-*`) and Binding Invariants (`BI-*`). The remaining `DD-*` and
-> `INFO-*` sections are replaceable design guidance, not delivery authority."
+> `INFO-*` sections are replaceable design guidance, not delivery authority.
+> Read the Mission and Architecture Summary first for the integrated goal,
+> architecture, and technology choices; it is explanatory, not normative."
 
 Wait for the user's response. If they request changes, make them and re-run the
 spec review loop. Only after explicit approval, change the heading to

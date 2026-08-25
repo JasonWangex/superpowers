@@ -98,6 +98,25 @@ authority_model=$(awk '
   !infence && /^\*\*Authority Model:\*\*/ { print; exit }
 ' "$plan")
 
+summary_present=$(awk '
+  /^```/ { infence = !infence }
+  !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ { exit }
+  !infence && /^##[ \t]+Mission and Architecture Summary — Non-normative[ \t]*$/ { print "yes"; exit }
+' "$plan")
+
+ultimate_goal=$(awk '
+  /^```/ { infence = !infence }
+  !infence && /^#+[ \t]+Task[ \t]+[0-9]+/ { exit }
+  !infence && /^##[ \t]+Mission and Architecture Summary — Non-normative[ \t]*$/ { insummary = 1; next }
+  insummary && !infence && /^###[ \t]+Ultimate Goal[ \t]*$/ { ingoal = 1; next }
+  ingoal && !infence && /^##+[ \t]+/ { exit }
+  ingoal { print }
+' "$plan")
+if [ -n "$summary_present" ] && ! printf '%s\n' "$ultimate_goal" | grep -q '[^[:space:]]'; then
+  echo "typed-v1 plan ${plan} is missing a non-empty Mission and Architecture Summary Ultimate Goal before its tasks" >&2
+  exit 4
+fi
+
 field_value() {
   field_name=$1
   sed -n "s/^\\*\\*${field_name}:\\*\\*[[:space:]]*//p" "$task_tmp" | head -1
@@ -205,6 +224,9 @@ render_tmp=$(mktemp)
   printf '# Authority Prelude\n\n'
   printf '%s\n' "$authority_model"
   printf '%s\n\n' "$spec_line"
+  if [ -n "$summary_present" ]; then
+    printf '## Mission Context — Non-binding\n%s\n\n' "$ultimate_goal"
+  fi
   printf '## Normative Authority\n\n%s\n\n' "$contract_lines"
   printf '## Relevant Non-goals\n\n'
   if [ -n "$forbidden_lines" ]; then printf '%s\n' "$forbidden_lines"; else printf -- '- None.\n'; fi

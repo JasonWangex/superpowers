@@ -105,6 +105,13 @@ in at least five fresh contexts when changing typed authority semantics. See
 `docs/superpowers/specs/2026-08-24-typed-spec-authority-eval-results.md` for the frozen
 `gpt-5.6-sol` xhigh evidence and revision IDs.
 
+#### mission-architecture-summary-pressure.md
+Manual authoring fixture for the human-readable summary extension. It checks
+that a typed spec writes all seven summary sections, a typed plan copies the
+whole summary verbatim, and a task brief receives only the exact non-binding
+`Ultimate Goal`. The corresponding five-sample `gpt-5.6-sol` xhigh comparison
+is recorded in the same eval-results document.
+
 ### Integration Tests (use --integration flag)
 
 #### test-subagent-driven-development-integration.sh

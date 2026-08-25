@@ -56,6 +56,36 @@ PLAN
 **Spec:** `docs/superpowers/specs/example.md`
 **Authority Model:** typed-v1
 
+## Mission and Architecture Summary — Non-normative
+
+### Ultimate Goal
+
+Preserve the public response while delivering the requested field with the smallest conforming change.
+
+### Current Problem
+
+The current response does not expose the requested field.
+
+### End-to-End Flow
+
+The existing request path reads the value and adds it to the current response.
+
+### Technical Architecture
+
+The existing service and serializer remain the implementation boundary.
+
+### Key Technology Choices
+
+Reuse the current storage and service rather than adding infrastructure.
+
+### Scope and Trade-offs
+
+Favor a local reversible change over a generalized platform.
+
+### Definition of Success
+
+The contract test passes without changing existing response fields.
+
 ## Global Constraints
 
 ### Human Contract
@@ -88,11 +118,83 @@ PLAN
 
 Add the response field with the smallest conforming change.
 PLAN
+    cat > "$repo/typed-plan-pre-summary.md" <<'PLAN'
+# Typed Plan From Before the Summary Extension
+
+**Spec:** `docs/superpowers/specs/example.md`
+**Authority Model:** typed-v1
+
+## Global Constraints
+
+### Human Contract
+- HC-1: Preserve the public response.
+
+### Binding Invariants
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+
+### Non-goals
+- NG-1: Do not refactor unrelated behavior.
+
+### Done Evidence
+- DE-1: Contract tests pass.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed when all relevant HC-* and BI-* items still pass; record the reason and evidence.
+
+---
+
+### Task 1: Add the response field
+
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Forbidden Scope:** NG-1
+**Design Defaults:** None.
+
+Add the response field with the smallest conforming change.
+PLAN
+    cat > "$repo/typed-plan-empty-goal.md" <<'PLAN'
+# Invalid Typed Plan
+
+**Spec:** `docs/superpowers/specs/example.md`
+**Authority Model:** typed-v1
+
+## Mission and Architecture Summary — Non-normative
+
+### Ultimate Goal
+
+### Current Problem
+
+The current response does not expose the requested field.
+
+## Global Constraints
+- HC-1: Preserve the public response.
+- BI-1 (supports HC-1): Existing response fields remain compatible.
+- NG-1: Do not refactor unrelated behavior.
+- DE-1: Contract tests pass.
+
+### Deviation Policy
+- Replacing a DD-* item with a smaller reversible implementation is allowed.
+
+---
+
+### Task 1: Invalid typed task
+
+**Contract Coverage:** HC-1, BI-1
+**Enables Evidence:** DE-1
+**Forbidden Scope:** NG-1
+**Design Defaults:** None.
+PLAN
     cat > "$repo/typed-plan-missing-field.md" <<'PLAN'
 # Invalid Typed Plan
 
 **Spec:** `docs/superpowers/specs/example.md`
 **Authority Model:** typed-v1
+
+## Mission and Architecture Summary — Non-normative
+
+### Ultimate Goal
+
+Validate typed task authority without importing unrelated architecture.
 
 ## Global Constraints
 
@@ -119,6 +221,12 @@ PLAN
 **Spec:**
 `docs/superpowers/specs/example.md`
 **Authority Model:** typed-v1
+
+## Mission and Architecture Summary — Non-normative
+
+### Ultimate Goal
+
+Validate the typed plan structure.
 
 ## Global Constraints
 - HC-1: Preserve the public response.
@@ -149,6 +257,12 @@ PLAN
 
 **Spec:** \`docs/superpowers/specs/example.md\`
 **Authority Model:** typed-v1
+
+## Mission and Architecture Summary — Non-normative
+
+### Ultimate Goal
+
+Validate authority field namespaces without importing unrelated architecture.
 
 ## Global Constraints
 - HC-1: Preserve the public response.
@@ -279,6 +393,8 @@ PLAN
         "# Authority Prelude" \
         "**Authority Model:** typed-v1" \
         '**Spec:** `docs/superpowers/specs/example.md`' \
+        "## Mission Context — Non-binding" \
+        "Preserve the public response while delivering the requested field with the smallest conforming change." \
         "HC-1: Preserve the public response." \
         "BI-1 (supports HC-1): Existing response fields remain compatible." \
         "NG-1: Do not refactor unrelated behavior." \
@@ -293,6 +409,21 @@ PLAN
         fi
     done
 
+    local excluded_summary_text
+    for excluded_summary_text in \
+        "The current response does not expose the requested field." \
+        "The existing request path reads the value" \
+        "The existing service and serializer remain" \
+        "Reuse the current storage and service" \
+        "Favor a local reversible change" \
+        "The contract test passes without changing"; do
+        if [[ "$typed_content" != *"$excluded_summary_text"* ]]; then
+            pass "typed task-brief excludes non-goal summary detail: $excluded_summary_text"
+        else
+            fail "typed task-brief excludes non-goal summary detail: $excluded_summary_text"
+        fi
+    done
+
     local unrelated_text
     for unrelated_text in "HC-2:" "BI-2" "NG-2:" "DE-2:"; do
         if [[ "$typed_content" != *"$unrelated_text"* ]]; then
@@ -301,6 +432,32 @@ PLAN
             fail "typed task-brief excludes unrelated authority: $unrelated_text"
         fi
     done
+
+    local pre_summary_out pre_summary_path pre_summary_content
+    rc=0
+    pre_summary_out="$(cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan-pre-summary.md 1)" || rc=$?
+    pre_summary_path="$(printf '%s\n' "$pre_summary_out" | sed -n 's/^wrote \(.*\): [0-9][0-9]* lines$/\1/p')"
+    if [[ "$rc" -eq 0 && -s "$pre_summary_path" ]]; then
+        pass "typed plans created before the summary extension remain executable"
+    else
+        fail "typed plans created before the summary extension remain executable"
+        echo "    exit: $rc"
+    fi
+    pre_summary_content="$(cat "$pre_summary_path" 2>/dev/null || true)"
+    if [[ "$pre_summary_content" != *"## Mission Context — Non-binding"* ]]; then
+        pass "pre-summary typed plans do not invent an Ultimate Goal"
+    else
+        fail "pre-summary typed plans do not invent an Ultimate Goal"
+    fi
+
+    rc=0
+    (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan-empty-goal.md 1 >/dev/null 2>&1) || rc=$?
+    if [[ "$rc" -eq 4 ]]; then
+        pass "typed plan with a summary but an empty Ultimate Goal errors with exit 4"
+    else
+        fail "typed plan with a summary but an empty Ultimate Goal errors with exit 4"
+        echo "    exit: $rc"
+    fi
 
     rc=0
     (cd "$repo" && "$SDD_SCRIPTS/task-brief" typed-plan-missing-field.md 1 >/dev/null 2>&1) || rc=$?

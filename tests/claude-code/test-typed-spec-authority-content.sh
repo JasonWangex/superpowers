@@ -67,6 +67,21 @@ main() {
         "brainstorming emits the typed-v1 marker"
     require_literal "$brainstorming" "## Human Contract — APPROVED" \
         "brainstorming defines the approved Human Contract"
+    require_literal "$brainstorming" "## Mission and Architecture Summary — Non-normative" \
+        "brainstorming emits a human-readable mission and architecture summary"
+    for summary_heading in \
+        "### Ultimate Goal" \
+        "### Current Problem" \
+        "### End-to-End Flow" \
+        "### Technical Architecture" \
+        "### Key Technology Choices" \
+        "### Scope and Trade-offs" \
+        "### Definition of Success"; do
+        require_literal "$brainstorming" "$summary_heading" \
+            "brainstorming summary includes: $summary_heading"
+    done
+    require_regex_flat "$brainstorming" 'Mission and Architecture Summary.*(non-normative|not.*authority).*(HC-\*|BI-\*)' \
+        "brainstorming keeps the summary non-normative and traceable"
     require_regex "$brainstorming" 'HC-\*.*BI-\*.*normative|normative.*HC-\*.*BI-\*' \
         "brainstorming limits normative authority to HC and BI items"
     require_regex "$brainstorming" 'DD-\*.*replaceable|replaceable.*DD-\*' \
@@ -82,9 +97,17 @@ main() {
         "spec reviewer enforces the normative boundary"
     require_regex "$spec_reviewer" 'DD-\*.*(advisory|non-blocking|replaceable)' \
         "spec reviewer does not promote Design Defaults"
+    require_regex_flat "$spec_reviewer" 'Mission and Architecture Summary.*(complete|readable|consistent).*(not.*authority|non-normative)' \
+        "spec reviewer validates summary readability without promoting authority"
 
     require_literal "$writing_plans" "**Authority Model:** typed-v1" \
         "writing-plans emits the typed plan marker"
+    require_literal "$writing_plans" "## Mission and Architecture Summary — Non-normative" \
+        "writing-plans carries the complete summary"
+    require_regex_flat "$writing_plans" 'typed-v1.*(copy|copied).*(Mission and Architecture Summary).*(verbatim|byte-for-byte|without.*rewrite)|(Mission and Architecture Summary).*(verbatim|byte-for-byte|without.*rewrite).*typed-v1' \
+        "writing-plans copies the typed summary without rewriting"
+    require_regex_flat "$writing_plans" 'typed-v1.*(replace|instead of).*(Goal|Architecture|Tech Stack)|(Goal|Architecture|Tech Stack).*(replace|instead of).*typed-v1' \
+        "typed plans replace the short legacy header with the complete summary"
     require_literal "$writing_plans" "**Contract Coverage:**" \
         "writing-plans task template carries contract coverage"
     require_literal "$writing_plans" "**Enables Evidence:**" \
@@ -106,6 +129,8 @@ main() {
         "plan reviewer checks typed normative coverage"
     require_regex "$plan_reviewer" 'DD-\*.*(not.*missing|not.*require|replaceable|advisory)' \
         "plan reviewer does not require Design Defaults literally"
+    require_regex_flat "$plan_reviewer" 'Mission and Architecture Summary.*(verbatim|exact).*spec' \
+        "plan reviewer checks exact summary propagation"
 
     require_literal "$executing_plans" "**Authority Model:** typed-v1" \
         "executing-plans detects the typed authority model"
@@ -128,6 +153,8 @@ main() {
         "SDD detects the typed authority model"
     require_regex_flat "$sdd" '(task brief|authority prelude).*(binding authority|source of requirements)|(binding authority|source of requirements).*(task brief|authority prelude)' \
         "SDD makes the typed brief the execution authority"
+    require_regex_flat "$sdd" '(Mission Context|Ultimate Goal).*(non-binding|context).*(task brief|brief)|(task brief|brief).*(Mission Context|Ultimate Goal).*(non-binding|context)' \
+        "SDD gives task agents only the non-binding Ultimate Goal"
     require_regex_flat "$sdd" 'Contract and[[:space:]]+Invariant Compliance' \
         "SDD names the typed review verdict"
     require_regex_flat "$sdd" 'DD-\*.*smaller.*reversible.*(allowed|implement)|smaller.*reversible.*DD-\*' \
